@@ -143,6 +143,21 @@ def validate_identifier(sequence_identifier):
 	identifier_errors -- list of errors found with identifier
 	"""
 
+	identifier_errors = []
+
+	if (not sequence_identifier):
+		message = ("Sequence identifier is null")
+		identifier_errors.append(message)
+
+	if (len(sequence_identifier) > field_length_limit):
+		message = ("Sequence identifier is too long (>50): {0}".format(sequence_identifier))
+		identifier_errors.append(message)
+
+	if (not re.match(character_regex, sequence_identifier)):
+		message = ("Sequence identifier {0} does not match regular expression {1}"
+				   .format(sequence_identifier, character_regex.pattern))
+
+	return identifier_errors
 
 
 def validate_insdc_sequence_accession(insdc_sequence_accession):
