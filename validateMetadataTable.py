@@ -112,17 +112,25 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 
 	for record_index in range(0, len(sorted_record_headers)):
 		try:
-			input_index = sorted_table_headers.index(sorted_record_headers[record_index])
+			header_to_check = sorted_record_headers[record_index]
+			table_index = sorted_table_headers.index(header_to_check)
 		except ValueError:
+			message = ("A custom header specified in the metadata record, does"
+					   " not exist in the metadata table: {0}".format(header_to_check))
+			custom_column_errors.append(message)
+			continue
 
+		sorted_record_headers = sorted_record_headers.pop(record_index)
+		sorted_table_headers = sorted_table_headers.pop(table_index)
 
-			##TODO - REVIEW AND FINISH THIS
-
-
+	try:
+		assert(not sorted_table_headers)
+	except AssertionError:
+		message = ("One or more headers used in the metadata table were "
+				   "not defined in the metadata record: {0}".format(sorted_table_headers))
+		custom_column_errors.append(message)
 
 	return custom_column_errors
-
-
 
 
 def validate_identifier(sequence_identifier):
