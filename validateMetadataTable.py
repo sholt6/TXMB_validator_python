@@ -172,6 +172,23 @@ def validate_insdc_sequence_accession(insdc_sequence_accession):
 						 invalid accession still counts as accession
 	"""
 
+	accession_errors = []
+	accession_present = False
+	insdc_acc_regex = re.compile(r'^[A-Z]{1,6}[0-9]{5,8}(\.[0-9])?$')
+
+	if (not insdc_sequence_accession):
+		return accession_errors, accession_present
+	else:
+		accession_present = True
+
+	valid_accession = re.match(insdc_acc_regex, insdc_sequence_accession)
+
+	if not valid_accession:
+		message = ("{0} does not appear to be a valid INSDC sequence accession"
+				   .format(insdc_sequence_accession))
+		accession_errors.append(message)
+
+	return accession_errors, accession_present
 
 
 def validate_insdc_sequence_range(insdc_sequence_range, accession_present):
