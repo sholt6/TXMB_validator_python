@@ -230,10 +230,21 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 
 	Returns:
 	organism_name_errors -- list of errors found with name
-	expected_ncbi_tax_id -- int, tax ID determined if using NCBI tax
+	expected_ncbi_tax_id -- int list, tax IDs determined if using NCBI tax
 	"""
 
-	# can catch connection error here!
+	organism_name_errors = []
+	expected_ncbi_tax_id = 0
+	tax_suggest_url = 'https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/suggest-for-submission/'
+
+	if not local_organism_name:
+		message = ("No organism name has been given for this record")
+		organism_name_errors.append(message)
+		return organism_name_errors, expected_ncbi_tax_id
+
+	if ncbi_tax:
+		final_url = (tax_suggest_url + local_organism_name)
+
 
 def validate_local_lineage(local_lineage):
 	"""Minimal checks of organism lineage format. Null input allowed.
