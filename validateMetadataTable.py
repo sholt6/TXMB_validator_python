@@ -73,11 +73,10 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 		mandatory_headers = mandatory_headers.pop(mand_index)
 		input_headers = input_headers.pop(input_index)
 
-	try:
-		assert(not mandatory_headers)
-	except AssertionError:
+	if (mandatory_headers):
 		message = ("One or more mandatory headers were not found in the input "
 				   "table: {0}".format(mandatory_headers))
+		mandatory_header_errors.append(message)
 
 	custom_headers = input_headers
 
