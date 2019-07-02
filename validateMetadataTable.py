@@ -197,6 +197,27 @@ def validate_insdc_sequence_range(insdc_sequence_range, accession_present):
 	range_errors -- list of errors found with range
 	"""
 
+	range_errors = []
+	range_regex = re.compile(r'^\d+\.\.\d+$')
+
+	if not insdc_sequence_range:
+		return range_errors
+	elif (insdc_sequence_range and not accession_present):
+		message = ("An accession range {0} was given for a record with no "
+				   "accession specified".format(insdc_sequence_range))
+		range_errors.append(message)
+
+	if (not str(insdc_sequence_range)):
+		message = ("A given accession range could not be read as a string")
+		range_errors.append(message)
+
+	valid_range = re.match(range_regex, insdc_sequence_range)
+
+	if not valid_range:
+		message = ("{0} is not a valid sequence range".format(insdc_sequence_range))
+		range_errors.append(message)
+
+	return range_errors
 
 
 def validate_local_organism_name(local_organism_name, ncbi_tax):
