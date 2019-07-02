@@ -103,9 +103,7 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 	sorted_record_headers = record_headers.sort()
 	sorted_table_headers = record_headers.sort()
 
-	try:
-		assert(len(sorted_record_headers) == len(sorted_table_headers))
-	except AssertionError:
+	if (len(sorted_record_headers) != len(sorted_table_headers)):
 		message = ("Number of custom headers is mismatched between metadata "
 				   "record and metadata table.")
 		custom_column_errors.append(message)
@@ -123,9 +121,7 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 		sorted_record_headers = sorted_record_headers.pop(record_index)
 		sorted_table_headers = sorted_table_headers.pop(table_index)
 
-	try:
-		assert(not sorted_table_headers)
-	except AssertionError:
+	if sorted_table_headers:
 		message = ("One or more headers used in the metadata table were "
 				   "not defined in the metadata record: {0}".format(sorted_table_headers))
 		custom_column_errors.append(message)
