@@ -299,17 +299,37 @@ def validate_local_lineage(local_lineage):
 	return local_lineage_errors
 
 
-def validate_ncbi_tax_id(input_ncbi_tax_id, expected_ncbi_tax_id, ncbi_tax):
+def validate_ncbi_tax_id(input_ncbi_tax_id, expected_ncbi_tax_ids, ncbi_tax, local_organism_name):
 	"""Checks given Tax ID matches expected Tax ID, if NCBI tax in use
 
 	Keyword arguments:
 	input_ncbi_tax_id -- int, tax id from table
-	expected_ncbi_tax_id -- int, tax id from function validate_local_organism_name()
+	expected_ncbi_tax_id -- int list, tax ids from validate_local_organism_name()
 	ncbi_tax -- bool, whether NCBI tax is being used for this submission
+	local_organism_name -- str, organism name
 
 	Returns:
 	ncbi_tax_id_errors -- list of errors found
 	"""
+
+	ncbi_tax_id_errors = []
+
+	if not ncbi_tax:
+		if input_ncbi_tax_id:
+			message = ("An NCBI Tax ID was specified ({0}) but the submission is not "
+					   "indicated to be using this database.".format(input_ncbi_tax_id))
+			ncbi_tax_id_errors.append(message)
+
+		return ncbi_tax_id_errors
+
+	if input_ncbi_tax_id not in expected_ncbi_tax_ids:
+		message = ("Specified NCBI Tax ID ({0}) does not appear to match species "
+				   "name ({1})".format(input_ncbi_tax_id, local_organism_name))
+		ncbi_tax_id_errors.append(message)
+
+
+
+
 
 
 class Test(unittest.TestCase):
@@ -560,33 +580,33 @@ class Test(unittest.TestCase):
 
 	# validate_ncbi_tax_id tests
 	def test_validate_tax_id_valid_w_ncbi(self):
-		validate_tax_id_case_1 = validate_ncbi_tax_id(self.integer, self.integer, True)
+		validate_tax_id_case_1 = validate_ncbi_tax_id(self.integer, [self.integer], True, 'Homo sapiens')
 		assert(validate_tax_id_case_1[0])
 
 	def test_validate_tax_id_valid_wo_ncbi(self):
-		validate_tax_id_case_2 = validate_ncbi_tax_id(self.integer, self.integer, False)
+		validate_tax_id_case_2 = validate_ncbi_tax_id(self.integer, [self.integer], False, 'Homo sapiens')
 		assert(not validate_tax_id_case_2[0])
 
 	def test_validate_tax_id_invalid_w_ncbi(self):
-		validate_tax_id_case_3 = validate_ncbi_tax_id(self.integer, (self.integer + 1, True))
+		validate_tax_id_case_3 = validate_ncbi_tax_id(self.integer, [(self.integer + 1)], True, 'Homo sapiens')
 		assert(validate_tax_id_case_3[0])
 
 	def test_validate_tax_id_invalid_wo_ncbi(self):
-		validate_tax_id_case_4 = validate_ncbi_tax_id(self.integer, (self.integer + 1, False))
+		validate_tax_id_case_4 = validate_ncbi_tax_id(self.integer, [(self.integer + 1)], False, 'Homo sapiens')
 		assert(validate_tax_id_case_4[0])
 
 	def test_validate_tax_id_null_1(self):
-		validate_tax_id_case_5 = validate_ncbi_tax_id(0, self.integer, True)
+		validate_tax_id_case_5 = validate_ncbi_tax_id(0, [self.integer], True, 'Homo sapiens')
 		assert(validate_tax_id_case_5[0])
 
 	def test_validate_tax_id_null_2(self):
-		validate_tax_id_case_ = validate_ncbi_tax_id(self.integer, 0, True)
+		validate_tax_id_case_ = validate_ncbi_tax_id(self.integer, [0], True, 'Homo sapiens')
 		assert(validate_tax_id_case_[0])
 
 	def test_validate_tax_id_null_3(self):
-		validate_tax_id_case_ = validate_ncbi_tax_id(self.integer, self.integer, 0)
+		validate_tax_id_case_ = validate_ncbi_tax_id(self.integer, [self.integer], 0, 'Homo sapiens')
 		assert(validate_tax_id_case_[0])
 
 	def test_validate_tax_id_null_all(self):
-		validate_tax_id_case_ = validate_ncbi_tax_id(0, 0, 0)
+		validate_tax_id_case_ = validate_ncbi_tax_id(0, 0, 0, 0)
 		assert(not validate_tax_id_case_[0])
