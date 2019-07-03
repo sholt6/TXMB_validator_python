@@ -327,8 +327,7 @@ def validate_ncbi_tax_id(input_ncbi_tax_id, expected_ncbi_tax_ids, ncbi_tax, loc
 				   "name ({1})".format(input_ncbi_tax_id, local_organism_name))
 		ncbi_tax_id_errors.append(message)
 
-
-
+	return ncbi_tax_id_errors
 
 
 
