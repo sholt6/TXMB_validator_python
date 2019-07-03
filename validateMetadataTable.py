@@ -275,17 +275,28 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 	return organism_name_errors, expected_ncbi_tax_ids
 
 
-
 def validate_local_lineage(local_lineage):
 	"""Minimal checks of organism lineage format. Null input allowed.
 	Doesn't check that lineage is appropriate to organism name.
 
 	Keyword arguments:
-	local_lineage -- string, input linage of organism
+	local_lineage -- string, input lineage of organism
 
 	Returns:
 	local_lineage_errors -- list of errors found
 	"""
+
+	local_lineage_errors = []
+
+	if not local_lineage:
+		return local_lineage_errors
+
+	if not str(local_lineage):
+		message = ("Local lineage for this record could not be parsed as a "
+				   "valid string")
+		local_lineage_errors.append(message)
+
+	return local_lineage_errors
 
 
 def validate_ncbi_tax_id(input_ncbi_tax_id, expected_ncbi_tax_id, ncbi_tax):
