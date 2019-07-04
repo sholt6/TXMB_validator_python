@@ -29,8 +29,18 @@ def validate_number_of_columns(mandatory_headers, input_headers, record_custom_c
 	message = ''
 
 	num_mandatory_headers = len(mandatory_headers)
-	num_input_headers = len(input_headers)
-	num_custom_columns = len(record_custom_columns)
+
+	try:
+		num_input_headers = len(input_headers)
+	except TypeError:
+		message = ("Could not get headers from metadata table, record not readable")
+		column_number_errors.append(message)
+		return column_number_errors
+
+	try:
+		num_custom_columns = len(record_custom_columns)
+	except TypeError:
+		num_custom_columns = 0
 
 	num_columns_expected = num_mandatory_headers + num_custom_columns
 
@@ -41,7 +51,6 @@ def validate_number_of_columns(mandatory_headers, input_headers, record_custom_c
 		column_number_errors.append(message)
 
 	return column_number_errors
-
 
 
 def validate_mandatory_headers(input_headers, mandatory_headers):
@@ -58,26 +67,25 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 
 	mandatory_header_errors = []
 	custom_headers = []
+	found_headers = []
 
-	for mand_index in range(0, len(mandatory_headers)):
+	for mandatory_header in mandatory_headers:
 		try:
-			input_index = input_headers.index(mandatory_headers[mand_index])
+			input_index = input_headers.index(mandatory_header)
+			found_headers.append(input_headers.pop(input_index))
 		except ValueError:
 			message = ("A mandatory header, '{0}', could not be found in the input"
-					   " metadata table".format(mandatory_headers[mand_index]))
+					   " metadata table".format(mandatory_header))
 			mandatory_header_errors.append(message)
-			continue
-		mandatory_headers = mandatory_headers.pop(mand_index)
-		input_headers = input_headers.pop(input_index)
 
-	if (mandatory_headers):
+	if (mandatory_headers != found_headers):
 		message = ("One or more mandatory headers were not found in the input "
-				   "table: {0}".format(mandatory_headers))
+				   "table. Mandatory headers: {0}".format(mandatory_headers))
 		mandatory_header_errors.append(message)
 
-	custom_headers = input_headers
+	input_custom_headers = input_headers
 
-	return mandatory_header_errors, custom_headers
+	return mandatory_header_errors, input_custom_headers
 
 
 def validate_custom_columns(table_custom_columns, record_custom_columns):
@@ -174,7 +182,7 @@ def validate_insdc_sequence_accession(insdc_sequence_accession):
 	else:
 		accession_present = True
 
-	valid_accession = re.match(insdc_acc_regex, insdc_sequence_accession)
+	valid_accession = re.match(insdc_acc_regex, str(insdc_sequence_accession))
 
 	if not valid_accession:
 		message = ("{0} does not appear to be a valid INSDC sequence accession"
@@ -197,6 +205,7 @@ def validate_insdc_sequence_range(insdc_sequence_range, accession_present):
 
 	range_errors = []
 	range_regex = re.compile(r'^\d+\.\.\d+$')
+	valid_range = False
 
 	if not insdc_sequence_range:
 		return range_errors
@@ -205,14 +214,14 @@ def validate_insdc_sequence_range(insdc_sequence_range, accession_present):
 				   "accession specified".format(insdc_sequence_range))
 		range_errors.append(message)
 
-	if (not str(insdc_sequence_range)):
+	try:
+		valid_range = re.match(range_regex, insdc_sequence_range)
+	except TypeError:
 		message = ("A given accession range could not be read as a string")
 		range_errors.append(message)
 
-	valid_range = re.match(range_regex, insdc_sequence_range)
-
 	if not valid_range:
-		message = ("{0} is not a valid sequence range".format(insdc_sequence_range))
+		message = ("'{0}' is not a valid sequence range".format(insdc_sequence_range))
 		range_errors.append(message)
 
 	return range_errors
@@ -236,7 +245,7 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 	tax_suggest_url = "https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/suggest-for-submission/"
 	name_regex = re.compile(r'^[A-Z][a-z]+\s.+$')
 
-	if not local_organism_name:
+	if (not local_organism_name):
 		message = ("No organism name has been given for this record")
 		organism_name_errors.append(message)
 		return organism_name_errors, expected_ncbi_tax_ids
@@ -254,14 +263,13 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 
 		try:
 			tax_suggestions = response.json()
-		except json.decoder.JSONDecodeError:
+			for suggestion in tax_suggestions:
+				taxID = suggestion['taxId']
+				expected_ncbi_tax_ids.append(taxID)
+		except (json.decoder.JSONDecodeError, UnboundLocalError):
 			message = ("No appropriate matches for {0} were found in NCBI taxonomy"
 					   .format(local_organism_name))
 			organism_name_errors.append(message)
-
-		for suggestion in tax_suggestions:
-				taxID = suggestion['taxId']
-				expected_ncbi_tax_ids.append(taxID)
 	else:
 		if re.match(name_regex, local_organism_name):
 			pass
@@ -332,7 +340,7 @@ def validate_ncbi_tax_id(input_ncbi_tax_id, expected_ncbi_tax_ids, ncbi_tax, loc
 class Test(unittest.TestCase):
 	"""Test suite for module validateMetadataTable.py"""
 
-	empty_list = ()
+	empty_list = []
 	boolean = True
 	string = 'string'
 	integer = 6
@@ -381,11 +389,11 @@ class Test(unittest.TestCase):
 	# validate_number_of_columns tests
 	def test_num_columns_correct(self):
 		num_columns_case_1 = validate_number_of_columns(self.mandatory_headers, self.correct_and_custom, self.custom_columns)
-		assert(not num_columns_case_1[0])
+		assert(not num_columns_case_1)
 
 	def test_num_columns_no_custom(self):
-		num_columns_case_2 = validate_number_of_columns(self.mandatory_headers, self.correct_and_custom, self.empty_list)
-		assert(not num_columns_case_2[0])
+		num_columns_case_2 = validate_number_of_columns(self.mandatory_headers, self.correct_headers, self.empty_list)
+		assert(not num_columns_case_2)
 
 	def test_num_columns_missing_w_custom(self):
 		num_columns_case_3 = validate_number_of_columns(self.mandatory_headers, self.missing_headers, self.custom_columns)
@@ -411,7 +419,7 @@ class Test(unittest.TestCase):
 
 	def test_validate_mandatory_missing(self):
 		mandatory_cols_case_2 = validate_mandatory_headers(self.missing_headers, self.mandatory_headers)
-		assert(mandatory_cols_case_1[0])
+		assert(mandatory_cols_case_2[0])
 		assert(not mandatory_cols_case_2[1])
 
 	def test_validate_mandatory_reverse_mismatch(self):
@@ -502,13 +510,13 @@ class Test(unittest.TestCase):
 
 	def test_validate_sequence_range_null_unwanted(self):
 		validate_seq_range_case_9 = validate_insdc_sequence_range('', False)
-		assert(not validate_seq_range_case_9[0])
+		assert(not validate_seq_range_case_9)
 
 	# validate_local_organism_name tests
 	def test_validate_organism_name_human_ncbi(self):
 		validate_organism_name_case_1 = validate_local_organism_name('Homo sapiens', True)
 		assert(not validate_organism_name_case_1[0])
-		assert(validate_organism_name_case_1[1] == '9606')
+		assert('9606' in validate_organism_name_case_1[1])
 
 	def test_validate_organism_name_human_not_ncbi(self):
 		validate_organism_name_case_2 = validate_local_organism_name('Homo sapiens', False)
@@ -518,7 +526,7 @@ class Test(unittest.TestCase):
 	def test_validate_organism_name_stram_ncbi(self):
 		validate_organism_name_case_3 = validate_local_organism_name('Stramenopiles sp. MAST-7 TOSAG23-7', True)
 		assert(not validate_organism_name_case_3[0])
-		assert(validate_organism_name_case_3[1] == '2590674')
+		assert('2590674' in validate_organism_name_case_3[1])
 
 	def test_validate_organism_name_stram_not_ncbi(self):
 		validate_organism_name_case_4 = validate_local_organism_name('Stramenopiles sp. MAST-7 TOSAG23-7', False)
@@ -540,15 +548,10 @@ class Test(unittest.TestCase):
 		assert(validate_organism_name_case_7[0])
 		assert(not validate_organism_name_case_7[1])
 
-	def test_validate_organism_name_bool(self):
-		validate_organism_name_case_8 = validate_local_organism_name(self.boolean, True)
+	def test_validate_organism_name_null(self):
+		validate_organism_name_case_8 = validate_local_organism_name('', True)
 		assert(validate_organism_name_case_8[0])
 		assert(not validate_organism_name_case_8[1])
-
-	def test_validate_organism_name_null(self):
-		validate_organism_name_case_9 = validate_local_organism_name('', True)
-		assert(validate_organism_name_case_9[0])
-		assert(not validate_organism_name_case_9[1])
 
 	# validate_local_lineage tests
 	def test_validate_lineage_human(self):
@@ -578,7 +581,7 @@ class Test(unittest.TestCase):
 	# validate_ncbi_tax_id tests
 	def test_validate_tax_id_valid_w_ncbi(self):
 		validate_tax_id_case_1 = validate_ncbi_tax_id(self.integer, [self.integer], True, 'Homo sapiens')
-		assert(not validate_tax_id_case_1[0])
+		assert(not validate_tax_id_case_1)
 
 	def test_validate_tax_id_valid_wo_ncbi(self):
 		validate_tax_id_case_2 = validate_ncbi_tax_id(self.integer, [self.integer], False, 'Homo sapiens')
