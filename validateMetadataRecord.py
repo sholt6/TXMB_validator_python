@@ -66,7 +66,6 @@ def validate_local_taxonomy_version(local_taxonomy_version):
 
 	Returns:
 	local_taxonomy_version_errors -- text of any errors found
-
 	"""
 
 	field_name = "local_taxonomy_version"
@@ -112,7 +111,6 @@ def validate_dataset_name(reference_dataset_name):
 
 	Returns:
 	dataset_name_errors -- text of any errors found
-
 	"""
 
 	field_name = "reference_dataset_name"
@@ -142,7 +140,6 @@ def validate_custom_columns(input_custom_columns):
 
 	Returns:
 	custom_column_name_errors -- text of any errors found
-
 	"""
 
 	custom_column_name_errors = []
