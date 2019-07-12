@@ -9,7 +9,6 @@ import unittests
 import re
 import gzip
 
-nucleotide_regex = re.compile("^[ATCGactgRYSWKMBDHVryswkmbdhvNn]*$")
 
 def validate_txmb_fasta(file_name, local_identifiers):
 	"""Main function for validating the FASTA component of a taxonomic
@@ -43,21 +42,33 @@ def validate_txmb_fasta(file_name, local_identifiers):
 		if line[0] == '>':
 			if line_flag == 'se' or line_flag =='':
 				line_flag = 'id'
-				# do stuff
+				id_line_errors, id_index = check_identifier(line, remaining_identifiers, linecount)
+				remaining_ids.pop(id_index)
+				fasta_errors.extend(id_line_errors)
 			elif line_flag == 'id':
-				message = ("Two consecutive ID lines in FASTA at line {0}".format(linecount))
+				message = ("Two consecutive ID lines in FASTA at line {0}"
+						   .format(linecount))
 				fasta_errors.append(message)
 		else:
 			if line_flag == 'id':
 				line_flag = 'se'
-				# do stuff
+				seq_line_errors = check_sequence(line, linecount)
+				fasta_errors.extend(seq_line_errors)
+			if line_flag == 'se':
+				message = ("Two consecutive sequence lines in FASTA at line {0}"
+						   .format(linecount))
+				fasta_errors.append(message)
 
+	if remaining_identifiers:
+		message = ("The following identifiers found in the metadata table "
+				   "were not found in the FASTA file:\n")
+		for identifier in remaining_identifiers:
+			message = message + identifier + "\n"
+			fasta_errors.append(message)
 
 	fasta_file.close()
+
 	return fasta_errors
-	# Make sure to close the file at the end
-	# Increment linecount immediately
-	# Check for any remaining IDs at the end
 
 
 def check_identifier(id_line, remaining_identifiers, linecount):
@@ -91,20 +102,40 @@ def check_identifier(id_line, remaining_identifiers, linecount):
 	return id_line_errors, id_index
 
 
-def check_sequence(sequence_line):
+def check_sequence(sequence_line, linecount):
 	"""Takes a line recognised as sequence line and confirms it matches
 	the nucleotide regex
 
 	Keyword arguments:
 	sequence_line -- str, a sequence line from FASTA
+	linecount -- current line in file
 
 	Returns:
 	sequence_errors -- list of any errors found to be added to main error log
 	"""
 
-	# find newlines with:
-	#	if '\n' in mystring or '\r' in mystring:
+	sequence_errors = []
+	nucleotide_regex = re.compile("^[ATCGactgRYSWKMBDHVryswkmbdhvNn]*$")
+	non_nucleotide_regex = re.compile("[efijlopquxzEFIJLOPQUXZ]")
 
+	if re.match(nucleotide_regex, sequence_line):
+		return sequence_errors
+
+	if re.match(r"\s"):
+		message = ("Sequence at line {0} contains whitespace".format(linecount))
+		sequence_errors.append(message)
+
+	if re.match(non_nucleotide_regex, sequence_line):
+		message = ("Sequence at line {0} contains non-nucleotide characters"
+			       .format(linecount))
+		sequence_errors.append(message)
+
+	if not sequence_line:
+		message = ("Sequence at line {0} is null"
+			       .format(linecount))
+		sequence_errors.append(message)
+
+	return sequence_errors
 
 
 class Test(unittest.TestCase):
