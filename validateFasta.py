@@ -43,8 +43,11 @@ def validate_txmb_fasta(file_name, table_identifiers):
 			if line_flag == 'se' or line_flag =='':
 				line_flag = 'id'
 				id_line_errors, id_index = check_identifier(line, remaining_ids, linecount)
-				remaining_ids.pop(id_index)
 				fasta_errors.extend(id_line_errors)
+				if id_index >= 0:
+					remaining_ids.pop(id_index)
+				else:
+					pass # this error is handled in check_identifier() function
 			elif line_flag == 'id':
 				message = ("Two consecutive ID lines in FASTA at line {0}"
 						   .format(linecount))
@@ -94,7 +97,7 @@ def check_identifier(id_line, remaining_ids, linecount):
 	line_content = id_line.split('|')
 	identifier_section = line_content[0]
 	identifier = identifier_section[1:]
-	id_index = 0
+	id_index = -1
 
 	try:
 		id_index = remaining_ids.index(identifier)
@@ -120,18 +123,17 @@ def check_sequence(sequence_line, linecount):
 
 	sequence_errors = []
 	nucleotide_regex = re.compile("^[ATCGactgRYSWKMBDHVryswkmbdhvNn]*$")
-	non_nucleotide_regex = re.compile("[efijlopquxzEFIJLOPQUXZ]")
+	nt_match = False
 
 	if re.match(nucleotide_regex, sequence_line):
-		return sequence_errors
+		nt_match = True
+	else:
+		message = ("Sequence at line {0} contains non-nucleotide characters"
+			       .format(linecount))
+		sequence_errors.append(message)
 
 	if re.match(r"\s", sequence_line):
 		message = ("Sequence at line {0} contains whitespace".format(linecount))
-		sequence_errors.append(message)
-
-	if re.match(non_nucleotide_regex, sequence_line):
-		message = ("Sequence at line {0} contains non-nucleotide characters"
-			       .format(linecount))
 		sequence_errors.append(message)
 
 	if not sequence_line:
@@ -139,7 +141,7 @@ def check_sequence(sequence_line, linecount):
 			       .format(linecount))
 		sequence_errors.append(message)
 
-	if not sequence_errors:
+	if not sequence_errors and not nt_match:
 		message = ("Sequence errors at line {0}, could not be diagnosed"
 				   .format(linecount))
 		sequence_errors.append(message)
@@ -214,7 +216,7 @@ class Test(unittest.TestCase):
 	def test_missing_pipe_full_line(self):
 		test_id_line_case_2 = check_identifier('>ITS1DB00588023175245uncultured fungusITS1 located by HMM annotation, 142bp', self.local_identifiers, 1)
 		assert(test_id_line_case_2[0])
-		assert(not test_id_line_case_2[1])
+		assert(test_id_line_case_2[1] == -1)
 
 	def test_missing_pipe_only_id(self):
 		test_id_line_case_3 = check_identifier('>ITS1DB00588023', self.local_identifiers, 1)
@@ -229,7 +231,7 @@ class Test(unittest.TestCase):
 	def test_id_not_in_list(self):
 		test_id_line_case_5 = check_identifier('>ITS1DB99999999|175245|uncultured fungus|ITS1 located by HMM annotation, 142bp', self.local_identifiers, 1)
 		assert(test_id_line_case_5[0])
-		assert(not test_id_line_case_5[1])
+		assert(test_id_line_case_5[1] == -1)
 
 
 	# check_sequence tests
@@ -255,4 +257,5 @@ class Test(unittest.TestCase):
 
 
 if (__name__ == "__main__"):
+
 	unittest.main()
