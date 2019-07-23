@@ -175,35 +175,35 @@ class Test(unittest.TestCase):
 
 	# validate_txmb_fasta tests
 	def test_fasta_validation_valid(self):
-		fasta_val_case_1 = validate_txmb_fasta('Test_FASTAs/valid.fasta.gz', self.local_identifiers)
+		fasta_val_case_1 = validate_txmb_fasta('Test_Files/valid.fasta.gz', self.local_identifiers)
 		assert(not fasta_val_case_1)
 
 	def test_fasta_validation_valid_missing_list_entry(self):
-		fasta_val_case_2 = validate_txmb_fasta('Test_FASTAs/valid.fasta.gz', self.local_identifiers_missing)
+		fasta_val_case_2 = validate_txmb_fasta('Test_Files/valid.fasta.gz', self.local_identifiers_missing)
 		assert(fasta_val_case_2[0])
 
 	def test_fasta_validation_2_seq_lines(self):
-		fasta_val_case_3 = validate_txmb_fasta('Test_FASTAs/two_seqs.fasta.gz', self.local_identifiers)
+		fasta_val_case_3 = validate_txmb_fasta('Test_Files/two_seqs.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_3[0])
 
 	def test_fasta_validation_2_id_lines(self):
-		fasta_val_case_4 = validate_txmb_fasta('Test_FASTAs/two_ids.fasta.gz', self.local_identifiers)
+		fasta_val_case_4 = validate_txmb_fasta('Test_Files/two_ids.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_4[0])
 
 	def test_fasta_validation_missing_entry(self):
-		fasta_val_case_5 = validate_txmb_fasta('Test_FASTAs/missing_entry.fasta.gz', self.local_identifiers)
+		fasta_val_case_5 = validate_txmb_fasta('Test_Files/missing_entry.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_5[0])
 
 	def test_fasta_validation_empty_seq_line(self):
-		fasta_val_case_6 = validate_txmb_fasta('Test_FASTAs/empty_line_seq.fasta.gz', self.local_identifiers)
+		fasta_val_case_6 = validate_txmb_fasta('Test_Files/empty_line_seq.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_6[0])
 
 	def test_fasta_validation_empty_id_line(self):
-		fasta_val_case_7 = validate_txmb_fasta('Test_FASTAs/empty_line_id.fasta.gz', self.local_identifiers)
+		fasta_val_case_7 = validate_txmb_fasta('Test_Files/empty_line_id.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_7[0])
 
 	def test_fasta_validation_empty_id(self):
-		fasta_val_case_8 = validate_txmb_fasta('Test_FASTAs/empty_id.fasta.gz', self.local_identifiers)
+		fasta_val_case_8 = validate_txmb_fasta('Test_Files/empty_id.fasta.gz', self.local_identifiers)
 		assert(fasta_val_case_8[0])
 
 
