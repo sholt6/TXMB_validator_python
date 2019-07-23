@@ -11,6 +11,28 @@ import re
 character_regex = re.compile("^[A-Za-z0-9_]+$")
 field_length_limit = 50
 
+def validate_file_content(metadata_record_dict, mandatory_record_content):
+	"""Checks for list of required fields in manifest file
+
+	Keyword arguments:
+	metadata_record_dict -- dict, content of manifest file
+	mandatory_record_content -- list, required tags
+
+	Returns:
+	metadata_record_file_errors -- list of errors found
+	"""
+
+	metadata_record_file_errors = []
+	input_fields = list(metadata_record_dict.keys())
+
+	for required_field in mandatory_record_content:
+		if required_field in input_fields:
+			pass
+		else:
+			message = ("Requierd field '{0}' not found in ")
+
+
+
 def validate_local_taxonomy(local_taxonomy):
 	"""Validate definition of taxonomic system
 
@@ -242,6 +264,31 @@ class Test(unittest.TestCase):
 	"""Test suite for module validateMetadataRecord.py"""
 	too_long_name = 'reallylongnameofatleast50charactersisthisenoughofthemyet'
 	unacceptable_characters_name = '!"£$%^&*()'
+
+	mandatory_record_content = ["LOCALTAXONOMY", "LOCALTAXONOMYVERSION",
+								"REFERENCEDATASETNAME", "FASTA", "TABLE"]
+	mandatory_record_content_no_table = ["LOCALTAXONOMY", "LOCALTAXONOMYVERSION",
+										 "REFERENCEDATASETNAME", "FASTA"]
+	mdata_record_dict = {"LOCALTAXONOMY" : "NCBI", "LOCALTAXONOMYVERSION" : "1",
+						 "REFERENCEDATASETNAME" : "test_name", "FASTA" : "file.fasta.gz",
+						 "TABLE" : "file.tsv.gz"}
+	mdata_record_dict_no_table = {"LOCALTAXONOMY" : "NCBI", "LOCALTAXONOMYVERSION" : "1",
+								  "REFERENCEDATASETNAME" : "test_name",
+								  "FASTA" : "file.fasta.gz"}
+
+	# Metadata record input tests
+	def test_mdata_record_valid(self):
+		record_validation_case_1 = validate_file_content(self.mdata_record_dict, self.mandatory_record_content)
+		assert(not record_validation_case_1)
+
+	def test_mdata_record_dict_missing_one(self):
+		record_validation_case_1 = validate_file_content(self.mdata_record_dict_no_table, self.mandatory_record_content)
+		assert(record_validation_case_1[0])
+
+	def test_mdata_record_missing_mandatory(self):
+		record_validation_case_1 = validate_file_content(self.mdata_record_dict, self.mandatory_record_content_no_table)
+		assert(record_validation_case_1[0])
+
 
 	# Taxonomy name tests
 	def test_local_taxonomy_length(self):
