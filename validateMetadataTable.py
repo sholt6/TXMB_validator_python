@@ -204,7 +204,7 @@ def validate_insdc_sequence_range(insdc_sequence_range, accession_present):
 	"""
 
 	range_errors = []
-	range_regex = re.compile(r'^\d+\.\.\d+$')
+	range_regex = re.compile(r'^<?\d+\.\.>?\d+$')
 	valid_range = False
 
 	if not insdc_sequence_range:
@@ -345,7 +345,7 @@ class Test(unittest.TestCase):
 	string = 'string'
 	integer = 6
 	too_long_name = 'reallylongnameofatleast50charactersisthisenoughofthemyet'
-	unacceptable_characters_name = '!"£$%^&*()'
+	unacceptable_characters_name = '!"$%^&*()'
 	mandatory_headers = ['Local Identifier',
 						 'INSDC Sequence Accession',
 						 'INSDC Sequence Range',
@@ -511,6 +511,10 @@ class Test(unittest.TestCase):
 	def test_validate_sequence_range_null_unwanted(self):
 		validate_seq_range_case_9 = validate_insdc_sequence_range('', False)
 		assert(not validate_seq_range_case_9)
+
+	def test_validate_sequence_range_partial_markers(self):
+		validate_seq_range_case_10 = validate_insdc_sequence_range('<1..>239', True)
+		assert(not validate_seq_range_case_10)
 
 	# validate_local_organism_name tests
 	def test_validate_organism_name_human_ncbi(self):
