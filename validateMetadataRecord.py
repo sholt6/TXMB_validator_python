@@ -29,7 +29,7 @@ def validate_file_content(metadata_record_dict, mandatory_record_content):
 		if required_field in input_fields:
 			pass
 		else:
-			message = ("Requierd field '{0}' not found in ")
+			message = ("Required field '{0}' not found in ")
 
 
 
