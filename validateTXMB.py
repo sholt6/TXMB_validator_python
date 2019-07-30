@@ -14,7 +14,7 @@ def validate_metadata_record(metadata_record_filename):
 	Returns:
 	metadata_record_errors -- list of errors found with metadata record
 	metadata_record -- dict, content of record
-	custom_columns -- dict, custom columns with values
+	record_custom_columns -- dict, custom columns with values
 	"""
 
 def generate_custom_col_dict(notyetsure):
@@ -28,7 +28,7 @@ def generate_custom_col_dict(notyetsure):
 	custom_columns -- dictionary of custom column names and descriptions
 	"""
 
-def validate_metadata_table(table_file_name, record_custom_columns, ncbi_tax):
+def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	"""Validate table of sequence metadata
 
 	Keyword arguments:
@@ -53,12 +53,12 @@ def validate_fasta(fasta_filename, table_identifiers):
 	"""
 
 
-def report_errors(error_messages, dataset_name):
+def report_errors(report_file, error_messages):
 	"""Report on errors found in dataset
 
 	Keyword arguments:
+	report_file -- file handle for error report
 	error_messages -- list of errors found in all files
-	dataset_name -- str, name of dataset as found in manifest file
 
 	Returns:
 	error_filename -- str, name of file with error messages, existence confirmed
@@ -73,6 +73,50 @@ def validate_txmb(manifest_filename):
 	Returns:
 	validation_result - bool, True if no errors found
 	"""
+
+	metadata_record_errors = []
+	metadata_table_errors = []
+	fasta_errors = []
+
+	record_custom_columns = {}
+	local_identifiers = []
+
+	metadata_record_errors, metadata_record, record_custom_columns = validate_metadata_record(manifest_filename)
+
+	report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
+	report_file = open('report_filename', 'w')
+
+	if metadata_record_errors:
+		report_errors(report_file, metadata_record_errors)
+		report_file.close()
+		sys.exit('Could not validate metadata record, please view error ' +
+				 'messages in ' + report_filename)
+
+	table_filename = metadata_record('TABLE')
+
+	metadata_table_errors, local_identifiers = validate_metadata_table(
+							table_filename, record_custom_columns, ncbi_tax)
+
+	if metadata_table_errors:
+		report_errors(report_file, metadata_table_errors)
+		report_file.close()
+		sys.exit('Could not validate ' + table_filename + ', please view ' +
+				 'error messages in ' + report_filename)
+
+	fasta_filename = metadata_record('FASTA')
+
+	fasta_errors = validate_fasta(fasta_filename, local_identifiers)
+
+	if fasta_errors:
+		report_errors(report_file, fasta_errors)
+		report_file.close()
+		sys.exit('Could not validate ' + fasta_filename + ', please view' +
+				 'error messages in ' + report_filename)
+
+	report_file.close()
+
+	return True
+
 
 class Test(unittest.TestCase):
 	valid_record = {'REFERENCEDATASETNAME' : 'valid_submission',
@@ -205,14 +249,6 @@ class Test(unittest.TestCase):
 	def test_fasta_val_empty_id(self):
 		fasta_val_result_empty_id = validate_fasta('Test_Files/empty_id.fasta.gz', self.table_identifiers)
 		assertTrue(fasta_val_result_empty_id)
-
-	# report_errors tests
-	error_messages = ['Example error 1', 'Example error 2']
-	set_name = 'test_txmb_val_dataset'
-
-	def test_error_reporting(self):
-		test_error_reporting_result = report_errors(self.error_messages, self.set_name)
-		assertTrue(test_error_reporting_result)
 
 	# validate_txmb tests
 	def test_txmb_val_valid(self):
