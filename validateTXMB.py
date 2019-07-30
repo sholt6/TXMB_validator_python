@@ -1,9 +1,9 @@
 import unittest
 import sys
 import gzip
-import validateMetadataRecord
-import validateMetadataTable
-import validateFasta
+import validateMetadataRecord as vmr
+import validateMetadataTable as vmt
+import validateFasta as vf
 
 def validate_metadata_record(metadata_record_filename):
 	"""Validate metadata record from manifest file
@@ -16,6 +16,54 @@ def validate_metadata_record(metadata_record_filename):
 	metadata_record -- dict, content of record
 	record_custom_columns -- dict, custom columns with values
 	"""
+
+	metadata_record_errors = []
+	metadata_record = {}
+	raw_custom_columns = []
+	record_custom_columns = {}
+
+	mandatory_record_content = ['LOCALTAXONOMY', 'REFERENCEDATASETNAME',
+								'FASTA', 'TABLE']
+
+	try:
+		with open(metadata_record_filename) as :
+			record_content = metadata_record_file.read()
+	except FileNotFoundError:
+		message = ('Could not find ' + metadata_record_filename)
+		metadata_record_errors.append(message)
+		return metadata_record_errors
+
+	for line in record_content:
+		line_content = line.split(None, 1)
+		try:
+			assert(len(line_content) == 2)
+		except AssertionError:
+			message = ('The following metadata record line could not be '
+					   'processed:\n' + line)
+			metadata_record_errors.append(message)
+			return metadata_record_errors
+
+		if line_content[0] in mandatory_record_content:
+			metadata_record[line_content[0]] = line_content[1]
+		else:
+			raw_custom_columns[line_content[0]] = line_content[1]
+
+	metadata_record_errors.extend(
+		vmr.validate_file_content(metadata_record, mandatory_record_content))
+
+	metadata_record_errors.extend(
+		vmr.validate_local_taxonomy(metadata_record['LOCALTAXONOMY'])
+
+	metadata_record_errors.extend(
+		vmr.validate_dataset_name(metadata_record['REFERENCEDATASETNAME'])
+
+	if 'LOCALTAXONOMYVERSION' in metadata_record:
+		metadata_record_errors.extend(
+			vmr.
+
+	if raw_custom_columns:
+		# do stuff
+
 
 def generate_custom_col_dict(notyetsure):
 	"""Generate dictionary of custom column names and descriptions
