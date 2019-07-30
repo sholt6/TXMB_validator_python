@@ -95,11 +95,10 @@ def validate_local_taxonomy_version(local_taxonomy_version):
 	local_taxonomy_version_errors = []
 
 	try:
-		assert(local_taxonomy_version)
-	except AssertionError:
-		local_taxonomy_version_errors.append(
-									get_empty_mandatory_value_error(field_name))
+		assert(local_taxonomy_version == '')
 		return local_taxonomy_version_errors
+	except AssertionError:
+		pass
 
 	try:
 		assert(str(local_taxonomy_version))
@@ -341,7 +340,7 @@ class Test(unittest.TestCase):
 
 	def test_local_taxonomy_version_empty(self):
 		local_taxonomy_version_case_4 = validate_local_taxonomy_version('')
-		assert(local_taxonomy_version_case_4[0])
+		assert(not local_taxonomy_version_case_4)
 
 	# Dataset name tests
 	def test_dataset_name_length(self):
