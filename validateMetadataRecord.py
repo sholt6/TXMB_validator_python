@@ -30,7 +30,9 @@ def validate_file_content(metadata_record_dict, mandatory_record_content):
 			pass
 		else:
 			message = ("Required field '{0}' not found in ")
+			metadata_record_file_errors.append(message)
 
+	return metadata_record_file_errors
 
 
 def validate_local_taxonomy(local_taxonomy):
@@ -264,8 +266,8 @@ class Test(unittest.TestCase):
 	too_long_name = 'reallylongnameofatleast50charactersisthisenoughofthemyet'
 	unacceptable_characters_name = '!"£$%^&*()'
 
-	mandatory_record_content = ["LOCALTAXONOMY", "LOCALTAXONOMYVERSION",
-								"REFERENCEDATASETNAME", "FASTA", "TABLE"]
+	mandatory_record_content = ["LOCALTAXONOMY", "REFERENCEDATASETNAME",
+								"FASTA", "TABLE"]
 	mandatory_record_content_no_table = ["LOCALTAXONOMY", "LOCALTAXONOMYVERSION",
 										 "REFERENCEDATASETNAME", "FASTA"]
 	mdata_record_dict = {"LOCALTAXONOMY" : "NCBI", "LOCALTAXONOMYVERSION" : "1",
@@ -286,7 +288,7 @@ class Test(unittest.TestCase):
 
 	def test_mdata_record_missing_mandatory(self):
 		record_validation_case_1 = validate_file_content(self.mdata_record_dict, self.mandatory_record_content_no_table)
-		assert(record_validation_case_1[0])
+		assert(not record_validation_case_1)
 
 
 	# Taxonomy name tests
