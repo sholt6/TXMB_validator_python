@@ -9,6 +9,7 @@ import unittest
 import re
 
 character_regex = re.compile("^[A-Za-z0-9_]+$")
+character_regex_with_space = re.compile("^[A-Za-z0-9_ ]+$")
 field_length_limit = 50
 
 def validate_file_content(metadata_record_dict, mandatory_record_content):
@@ -154,12 +155,48 @@ def validate_dataset_name(reference_dataset_name):
 	return reference_dataset_name_errors
 
 
-def validate_custom_columns(input_custom_columns):
+def generate_custom_col_dict(raw_custom_columns):
+	"""Takes custom column definitions from metadata record, parses into dict
+	with structure {'col name' : 'col description'}
+
+	Keyword arguments:
+	raw_custom_columns -- dict of user-provided custom fields in manifest
+
+	Returns:
+	custom_col_generation_errors -- list of errors found in parsing input
+	record_custom_columns -- dict of custom columns and their descriptions
+	"""
+
+	custom_col_generation_errors = []
+	record_custom_columns = {}
+
+	num_extra_cols = len(raw_custom_columns) / 2
+
+	if num_extra_cols.is_integer():
+		pass
+	else:
+		message = ('Custom columns do not all have definitions')
+		custom_col_generation_errors.append(message)
+
+	for i in range(0, int(num_extra_cols)):
+		key_key = 'CUSTOMCOLUMNHEADER' + str(i+1)
+		val_key = 'CUSTOMCOLUMNHEADER' + str(i+1) + 'DESCRIPTION'
+
+		try:
+			record_custom_columns[raw_custom_columns[key_key]] = raw_custom_columns[val_key]
+		except KeyError as e:
+			message = ('Expected to find line \'{0}\' in manifest file'.format(e))
+			custom_col_generation_errors.append(message)
+
+	return custom_col_generation_errors, record_custom_columns
+
+
+def validate_custom_columns(record_custom_columns):
 	"""Confirms custom columns meet some minimal standards including character
 	restriction, name length, and pairing
 
 	Keyword arguments:
-	input_custom_columns -- list of user-provided column names and descriptions
+	record_custom_columns -- dict of user-provided column names and descriptions
 
 	Returns:
 	custom_column_name_errors -- text of any errors found
@@ -167,27 +204,25 @@ def validate_custom_columns(input_custom_columns):
 
 	custom_column_name_errors = []
 
-	try:
-		assert(len(input_custom_columns) % 2 == 0)
-	except AssertionError:
-		column_no_message = ("Number of custom columns and descriptions is not "
-		"even, indicating that some are not matched.")
-		custom_column_name_errors.append(column_no_message)
+	for k, v in record_custom_columns.items():
+		field_name = "Custom Column: " + k
+		field_desc = "Column Description: " + v
 
-	for name in input_custom_columns:
-		field_name = "custom_column " + name
+		if not re.match(character_regex_with_space, k):
+			message = get_regex_mismatch_error_text(field_name, character_regex)
+			custom_column_name_errors.append(message)
 
-		try:
-			assert(re.match(character_regex, name))
-		except AssertionError:
-			custom_column_name_errors.append(get_regex_mismatch_error_text(
-												   field_name, character_regex))
+		if not re.match(character_regex_with_space, v):
+			message = get_regex_mismatch_error_text(field_desc, character_regex_with_space)
+			custom_column_name_errors.append(message)
 
-		try:
-			assert(len(name) <= field_length_limit)
-		except AssertionError:
-			custom_column_name_errors.append(get_field_length_error_text(
-																	field_name))
+		if (len(k) > field_length_limit):
+			message = get_field_length_error_text(field_name)
+			custom_column_name_errors.append(message)
+
+		if (len(v) > field_length_limit):
+			message = get_field_length_error_text(field_desc)
+			custom_column_name_errors.append(message)
 
 	return custom_column_name_errors
 
@@ -203,8 +238,8 @@ def get_regex_mismatch_error_text(field_name, source_regex):
 	string containing error message
 	"""
 
-	return("Value entered for " + field_name +
-			" does not match regex " + source_regex.pattern)
+	return("Value entered for '{0}' does not match regex '{1}'"
+		   .format(field_name, source_regex.pattern))
 
 
 def get_field_length_error_text(field_name):
@@ -217,8 +252,8 @@ def get_field_length_error_text(field_name):
 	string containing error message
 	"""
 
-	return("Value entered for " + field_name +
-			" exceeds character length limit of " + str(field_length_limit))
+	return("Value entered for '{0}' exceeds character length limit of {1}"
+		   .format(field_name, str(field_length_limit)))
 
 
 def get_data_type_error_text(field_name, field_value, type_name):
@@ -237,10 +272,10 @@ def get_data_type_error_text(field_name, field_value, type_name):
 	message = ''
 
 	try:
-		message = ("Value " + str(field_value) + " entered for " + field_name +
-		   " could not be parsed as a valid " + type_name)
+		message = ("Value '{0}' entered for '{1}' could not be parsed as a valid {2}"
+				   .format(str(field_value),field_name,type_name))
 	except TypeError:
-		message = "A value entered for " + field_name + " could not be read"
+		message = ("A value entered for '{0}' could not be read".format(field_name))
 
 	return message
 
@@ -256,7 +291,7 @@ def get_empty_mandatory_value_error(field_name):
 	string containing error message
 	"""
 
-	message = "No value was given for mandatory field " + field_name
+	message = ("No value was given for mandatory field '{0}'".format(field_name))
 
 	return message
 
@@ -353,22 +388,59 @@ class Test(unittest.TestCase):
 		dataset_name_case_2 = validate_dataset_name('$%^&*()')
 		assert(dataset_name_case_2[0])
 
-	# Custom column tests
+	# Custom column dict creation tests
+	input_custom_cols = {'CUSTOMCOLUMNHEADER1' : 'Annotation',
+						 'CUSTOMCOLUMNHEADER1DESCRIPTION' : 'Source of annotation',
+						 'CUSTOMCOLUMNHEADER2' : 'ITSoneDB URL',
+						 'CUSTOMCOLUMNHEADER2DESCRIPTION' : 'URL within ITSoneDB'}
+	processed_custom_cols = {'Annotation' : 'Source of annotation',
+							 'ITSoneDB URL' : 'URL within ITSoneDB'}
+	input_custom_cols_misnumbered = {'CUSTOMCOLUMNHEADER1' : 'Annotation',
+						 			 'CUSTOMCOLUMNHEADER2DESCRIPTION' : 'Source of annotation',
+						 			 'CUSTOMCOLUMNHEADER3' : 'ITSoneDB URL',
+						 			 'CUSTOMCOLUMNHEADER4DESCRIPTION' : 'URL within ITSoneDB'}
+	input_custom_cols_misnamed  = {'CUSTOMCOLUMNHEADER1' : 'Annotation',
+						 		   'CUSTOMCOLHEADER2DESCRIPTION' : 'Source of annotation',
+						 		   'CUSTOMCOLUMNDER3' : 'ITSoneDB URL',
+						 		   'CUSTOMCOLUMNHEADER4DESCRIPTION' : 'URL within ITSoneDB'}
+	input_custom_cols_long = {'Annotation lotsofextracharacterstomakethistoolongandthereforeinvalid' : 'Source of annotation',
+							  'ITSoneDB URL' : 'URL within ITSoneDB'}
+	input_custom_cols_bad_chars = {'Annotation!!!' : '$$Source of annotation',
+								   'ITSoneDB URL@@' : '##URL within ITSoneDB'}
+
+	def test_custom_col_gen_valid(self):
+		col_gen_case_1 = generate_custom_col_dict(self.input_custom_cols)
+		self.assertFalse(col_gen_case_1[0])
+		self.assertTrue(col_gen_case_1[1] == self.processed_custom_cols)
+
+	def test_custom_col_gen_mismatched(self):
+		col_gen_case_2 = generate_custom_col_dict(self.input_custom_cols_misnumbered)
+		self.assertTrue(col_gen_case_2[0])
+		self.assertFalse(col_gen_case_2[1])
+
+	def test_custom_col_gen_mispelled(self):
+		col_gen_case_3 = generate_custom_col_dict(self.input_custom_cols_misnamed)
+		self.assertTrue(col_gen_case_3[0])
+		self.assertFalse(col_gen_case_3[1])
+
+	# Custom column validation tests
 	long_columns = [too_long_name, too_long_name]
 	bad_name_columns = [unacceptable_characters_name, unacceptable_characters_name]
 	odd_no_of_columns = ['col1', 'desc1', 'col2']
 
+	def test_columns_valid(self):
+		columns_name_case_3 = validate_custom_columns(self.processed_custom_cols)
+		self.assertFalse(columns_name_case_3)
+
 	def test_columns_long(self):
-		columns_name_case_1 = validate_custom_columns(self.long_columns)
-		assert(columns_name_case_1[0])
+		columns_name_case_1 = validate_custom_columns(self.input_custom_cols_long)
+		self.assertTrue(columns_name_case_1[0])
 
 	def test_columns_bad_name(self):
-		columns_name_case_2 = validate_custom_columns(self.bad_name_columns)
-		assert(columns_name_case_2[0])
+		columns_name_case_2 = validate_custom_columns(self.input_custom_cols_bad_chars)
+		self.assertTrue(columns_name_case_2[0])
 
-	def test_columns_odd_no(self):
-		columns_name_case_3 = validate_custom_columns(self.odd_no_of_columns)
-		assert(columns_name_case_3[0])
+
 
 if __name__ == '__main__':
 	unittest.main()
