@@ -68,6 +68,8 @@ def validate_metadata_record(metadata_record_filename):
 		custom_col_gen_result = vmr.generate_custom_col_dict(raw_custom_columns)
 		metadata_record_errors.extend(custom_col_gen_result[0])
 		record_custom_columns = custom_col_gen_result[1]
+		metadata_record_errors.extend(
+			vmr.validate_custom_columns(record_custom_columns))
 
 	return (metadata_record_errors, metadata_record,
 			record_custom_columns, custom_columns)
