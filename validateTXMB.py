@@ -15,12 +15,14 @@ def validate_metadata_record(metadata_record_filename):
 	metadata_record_errors -- list of errors found with metadata record
 	metadata_record -- dict, content of record
 	record_custom_columns -- dict, custom columns with values
+	ncbi_tax -- bool, whether NCBI taxonomy has been specified for this submission
 	"""
 
 	metadata_record_errors = []
 	metadata_record = {}
-	raw_custom_columns = []
+	raw_custom_columns = {}
 	record_custom_columns = {}
+	ncbi_tax = False
 
 	mandatory_record_content = ['LOCALTAXONOMY', 'REFERENCEDATASETNAME',
 								'FASTA', 'TABLE']
@@ -52,17 +54,23 @@ def validate_metadata_record(metadata_record_filename):
 		vmr.validate_file_content(metadata_record, mandatory_record_content))
 
 	metadata_record_errors.extend(
-		vmr.validate_local_taxonomy(metadata_record['LOCALTAXONOMY'])
+		vmr.validate_dataset_name(metadata_record['REFERENCEDATASETNAME']))
 
-	metadata_record_errors.extend(
-		vmr.validate_dataset_name(metadata_record['REFERENCEDATASETNAME'])
+	tax_validation = vmr.validate_local_taxonomy(metadata_record['LOCALTAXONOMY'])
+	metadata_record_errors.extend(tax_validation[0])
+	ncbi_tax = tax_validation[1]
 
 	if 'LOCALTAXONOMYVERSION' in metadata_record:
 		metadata_record_errors.extend(
-			vmr.
+			vmr.validate_local_taxonomy_version(metadata_record['LOCALTAXONOMYVERSION']))
 
 	if raw_custom_columns:
-		# do stuff
+		custom_col_gen_result = vmr.generate_custom_col_dict(raw_custom_columns)
+		metadata_record_errors.extend(custom_col_gen_result[0])
+		record_custom_columns = custom_col_gen_result[1]
+
+	return (metadata_record_errors, metadata_record,
+			record_custom_columns, custom_columns)
 
 
 def generate_custom_col_dict(notyetsure):
