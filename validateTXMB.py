@@ -3,7 +3,7 @@ import sys
 import gzip
 import validateMetadataRecord as vmr
 import validateMetadataTable as vmt
-import validateFasta as vf
+import validateFasta as vFa
 
 def validate_metadata_record(metadata_record_filename):
 	"""Validate metadata record from manifest file
@@ -75,17 +75,6 @@ def validate_metadata_record(metadata_record_filename):
 			record_custom_columns, custom_columns)
 
 
-def generate_custom_col_dict(notyetsure):
-	"""Generate dictionary of custom column names and descriptions
-	### from what exactly?
-
-	Keyword arguments:
-	not yet sure
-
-	Returns:
-	custom_columns -- dictionary of custom column names and descriptions
-	"""
-
 def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	"""Validate table of sequence metadata
 
@@ -98,6 +87,84 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	metadata_table_errors -- list of errors found in metadata table
 	local_identifiers -- list of sequence identifiers found in metadata table
 	"""
+
+	mandatory_headers = ('local_identifier',
+						 'insdc_sequence_accession',
+						 'insdc_sequence_range',
+						 'local_organism_name',
+						 'local_lineage',
+						 'ncbi_tax_id')
+
+	metadata_table_errors = []
+	local_identifiers = []
+
+	try:
+		sequence_metadata_table = pd.read_csv(table_filename,
+										compression='gzip', header=0, sep='\t')
+	except (FileNotFoundError, UnicodeDecodeError, OSError) as e:
+		return e, local_identifiers
+
+	input_headers = list(sequence_metadata_table.columns.values)
+
+	metadata_table_errors.extend(
+		vmt.validate_number_of_columns(mandatory_headers, input_headers,
+									   record_custom_columns))
+
+	mandatory_header_validation = vmt.validate_mandatory_headers(input_headers,
+															 mandatory_headers)
+	metadata_table_errors.extend(mandatory_header_validation[0])
+	table_custom_headers = mandatory_header_validation[1]
+
+	metadata_table_errors.extend(vmt.validate_custom_columns(
+		table_custom_headers, record_custom_columns))
+
+	total_records = sequence_metadata_table.shape[0]
+	current_record = 1
+
+	for row_index in range(0, total_records):
+		row_errors = []
+
+		sequence_identifier = sequence_metadata_table.loc[row_index, mandatory_header[0]]
+		insdc_sequence_accession = sequence_metadata_table.loc[row_index, mandatory_header[1]]
+		insdc_sequence_range = sequence_metadata_table.loc[row_index, mandatory_header[2]]
+		local_organism_name = sequence_metadata_table.loc[row_index, mandatory_header[3]]
+		local_lineage = sequence_metadata_table.loc[row_index, mandatory_header[4]]
+		input_ncbi_tax_id = sequence_metadata_table.loc[row_index, mandatory_header[5]]
+
+		row_errors.extend(vmt.validate_identifier(sequence_identifier))
+		local_identifiers.append(sequence_identifier)
+
+		accession_errors, accession_present = vmt.validate_insdc_sequence_accession(
+			insdc_sequence_accession)
+		row_errors.extend(accession_errors)
+
+		row_errors.extend(vmt.validate_insdc_sequence_range(
+									insdc_sequence_range, accession_present))
+
+		organism_errors, expected_tax_ids = vmt.validate_local_organism_name(
+												local_organism_name, ncbi_tax)
+		row_errors.extend(organism_errors)
+
+		row_errors.extend(vmt.validate_local_lineage)
+
+		row_errors.extend(validate_ncbi_tax_id(input_ncbi_tax_id,
+							expected_tax_ids, ncbi_tax, local_organism_name))
+
+		for i in range(0, len(row_errors)):
+			row_errors[i] = ("Metadata Table Line {0}: {1}".
+							 format(current_record, row_errors[i]))
+
+		metadata_table_errors.extend(row_errors)
+
+		current_record += 1
+
+	if len(local_identifiers) != len(set(local_identifiers)):
+		message = ("Metadata table contains duplicate local identifiers")
+		metadata_table_errors.append(message)
+
+	return metadata_table_errors, local_identifiers
+
+
 
 def validate_fasta(fasta_filename, table_identifiers):
 	"""Validate sequence fasta file
@@ -121,6 +188,7 @@ def report_errors(report_file, error_messages):
 	Returns:
 	error_filename -- str, name of file with error messages, existence confirmed
 	"""
+
 
 def validate_txmb(manifest_filename):
 	"""Main function to validate input TXMB dataset
