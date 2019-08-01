@@ -1,0 +1,609 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"required",
+				"required_field"
+			],
+			[
+				"mandatory",
+				"mandatory_record_content"
+			],
+			[
+				"meta",
+				"metadata_record_dict"
+			],
+			[
+				"reco",
+				"record_validation_case_1"
+			],
+			[
+				"mandat",
+				"mandatory_record_content"
+			],
+			[
+				"LOCA",
+				"LOCALTAXONOMYVERSION"
+			],
+			[
+				"LOCL",
+				"LOCALTAXONOMY"
+			],
+			[
+				"test_seq_line",
+				"test_seq_line_case_5"
+			],
+			[
+				"fasta_",
+				"fasta_val_case_6"
+			],
+			[
+				"iden",
+				"identifier"
+			],
+			[
+				"remai",
+				"remaining_identifiers"
+			],
+			[
+				"seq",
+				"seq_line_errors"
+			],
+			[
+				"sequence",
+				"sequence_line"
+			],
+			[
+				"nuc",
+				"nucleotide_regex"
+			],
+			[
+				"rem",
+				"remaining_identifiers"
+			],
+			[
+				"ream",
+				"remaining_identifiers"
+			],
+			[
+				"num_colm",
+				"num_columns_case_2"
+			],
+			[
+				"ncbi_tax",
+				"ncbi_tax_id_errors"
+			],
+			[
+				"ncbi_",
+				"ncbi_tax_id_errors"
+			],
+			[
+				"local",
+				"local_organism_name"
+			],
+			[
+				"input",
+				"input_ncbi_tax_id"
+			],
+			[
+				"ncbi",
+				"ncbi_tax_id_errors"
+			],
+			[
+				"inpu",
+				"input_ncbi_tax_id"
+			],
+			[
+				"local_lin",
+				"local_lineage_errors"
+			],
+			[
+				"expected",
+				"expected_ncbi_tax_ids"
+			],
+			[
+				"name",
+				"name_regex"
+			],
+			[
+				"expe",
+				"expected_ncbi_tax_ids"
+			],
+			[
+				"expecte",
+				"expected_ncbi_tax_id"
+			],
+			[
+				"organism",
+				"organism_name_errors"
+			],
+			[
+				"range",
+				"range_errors"
+			],
+			[
+				"mandatory_",
+				"mandatory_header_errors"
+			],
+			[
+				"insdc",
+				"insdc_sequence_accession"
+			],
+			[
+				"identif",
+				"identifier_errors"
+			],
+			[
+				"input_",
+				"input_index"
+			],
+			[
+				"sorted",
+				"sorted_table_headers"
+			],
+			[
+				"record",
+				"record_index"
+			],
+			[
+				"custom_cl",
+				"custom_column_errors"
+			],
+			[
+				"custom",
+				"custom_column_errors"
+			],
+			[
+				"manda",
+				"mandatory_cols_case_5"
+			],
+			[
+				"validate",
+				"validate_identifer_case_2"
+			],
+			[
+				"validate_idn",
+				"validate_identifier"
+			],
+			[
+				"validate_",
+				"validate_identifier"
+			],
+			[
+				"validate_ideni",
+				"validate_identifier"
+			],
+			[
+				"validate_iden",
+				"validate_identifer_case_1"
+			],
+			[
+				"metadata_re",
+				"metadata_record_rows"
+			],
+			[
+				"metad",
+				"metadata_record_file"
+			],
+			[
+				"corret",
+				"correct_headers"
+			],
+			[
+				"num",
+				"num_columns_case_3"
+			],
+			[
+				"correct",
+				"correct_headers"
+			],
+			[
+				"corr",
+				"correct_headers"
+			],
+			[
+				"taxonom",
+				"taxonomy_validation_errors"
+			],
+			[
+				"local_taxonomy_ver",
+				"local_taxonomy_version_case_3"
+			],
+			[
+				"local_taxo",
+				"local_taxonomy_case_7"
+			],
+			[
+				"local_taxom",
+				"local_taxonomy_version"
+			],
+			[
+				"get",
+				"get_field_length_error_text"
+			],
+			[
+				"field",
+				"field_length_limit"
+			],
+			[
+				"referen",
+				"reference_dataset_name_errors"
+			],
+			[
+				"refere",
+				"reference_dataset_name"
+			],
+			[
+				"try",
+				"try\tTry/Except"
+			],
+			[
+				"local_taxonomy",
+				"local_taxonomy_version"
+			],
+			[
+				"character",
+				"character_regex"
+			],
+			[
+				"columns",
+				"columns_name_case_2"
+			],
+			[
+				"local_taxono",
+				"local_taxonomy_case_3"
+			],
+			[
+				"AN",
+				"ANALYSIS_TYPE"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"Snippet: ",
+				"Snippet: Try/Except"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/holt/Taxometabarcode/TXMB_validator_python/Test_Files/missing_identifier.tsv",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/Test_Files/empty_line.tsv",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/Test_Files/missing_entry.tsv",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/Test_Files/valid.tsv",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/validateMetadataTable.py",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/validateMetadataRecord.py",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/validateFasta.py",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/validateTXMB.py",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/plan.txt",
+		"/home/holt/Taxometabarcode/TXMB_validator_python/txmb_validator_python.sublime-",
+		"/home/holt/Ticket_Files/353830/get_lens.py",
+		"/home/holt/Ticket_Files/353830/rm_newline.py",
+		"/home/holt/Ticket_Files/352738/flatfile.embl",
+		"/home/holt/Ticket_Files/351137/ENA_typhimuriumUPM260_scaffolds.embl",
+		"/home/holt/Taxometabarcode/mdata_record.csv",
+		"/home/holt/Taxometabarcode/Python/custom_col_dict.py",
+		"/home/holt/Documentation/read_docs/update/assembly.rst",
+		"/home/holt/Documentation/read_docs/update.rst",
+		"/home/holt/Taxometabarcode/Python/plan.txt",
+		"/home/holt/Taxometabarcode/Python/validateMetadataTable.py",
+		"/home/holt/Taxometabarcode/Python/validateMetadataRecord.py",
+		"/home/holt/Taxometabarcode/Python/vmr_check.py",
+		"/home/holt/Documentation/read_docs/faq/umbrella.rst",
+		"/home/holt/Taxometabarcode/Sample_Set_Submission/validate.xml",
+		"/home/holt/Taxometabarcode/Sample_Set_Submission/submission.xml",
+		"/home/holt/Taxometabarcode/Sample_Set_Submission/analysis.xml",
+		"/home/holt/Misc_Scripts/set_entry_status.pl",
+		"/home/holt/Documentation/read_docs/general-guide/accessions.rst",
+		"/home/holt/workshop_2/test2_manifest.txt",
+		"/home/holt/Documentation/read_docs/tools_01.md",
+		"/home/holt/Documentation/read_docs/tools.rst",
+		"/home/holt/Documentation/read_docs/sequence/programmatic-flatfile.md",
+		"/home/holt/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
+		"/home/holt/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/holt/Prog_Sub/multiruntest/1experiment.xml",
+		"/home/holt/Prog_Sub/multiruntest/sample.xml",
+		"/home/holt/Prog_Sub/multiruntest/submission.xml",
+		"/home/holt/Prog_Sub/multiruntest/2run.xml",
+		"/home/holt/Prog_Sub/multiruntest/1run.xml",
+		"/home/holt/Prog_Sub/multiruntest/dummy1.fastq",
+		"/home/holt/Training/binned_metagenome_sample.xml",
+		"/home/holt/Ticket_Files/cancel.xml",
+		"/home/holt/Ticket_Files/343735/Lambda_1H12.embl",
+		"/home/holt/Documentation/read_docs/general-guide.rst",
+		"/home/holt/Documentation/read_docs/fileprep/upload.rst",
+		"/home/holt/Documentation/read_docs/fileprep/preparation.rst",
+		"/home/holt/Documentation/read_docs/fileprep/sequence-flatfile.rst",
+		"/home/holt/Documentation/read_docs/fileprep/assembly.md",
+		"/home/holt/Documentation/read_docs/fileprep/reads.md",
+		"/home/holt/Documentation/read_docs/faq/release.rst",
+		"/home/holt/Documentation/read_docs/faq/locus_tags.rst",
+		"/home/holt/Documentation/read_docs/faq/metagenomes.rst",
+		"/home/holt/Documentation/read_docs/faq/samples.rst",
+		"/home/holt/Documentation/read_docs/faq/runs.rst",
+		"/home/holt/Documentation/read_docs/faq/taxonomy.md",
+		"/home/holt/Ticket_Files/343735/Lambda_1H12_chromosome_list_file.txt",
+		"/home/holt/Ticket_Files/343735/webin-cli.report",
+		"/home/holt/Ticket_Files/343735/Lambda_1H12_manifest_matrice.txt",
+		"/home/holt/Ticket_Files/343735/genome/Lambda_1H12/validate/Lambda_1H12.embl.gz.report",
+		"/home/holt/Ticket_Files/343735/Lambda_1H12_manifest_matrice.txt.report",
+		"/home/holt/workshop_2/test3_manifest.txt",
+		"/home/holt/Ticket_Files/343735/commande.txt",
+		"/home/holt/Misc_Scripts/Python_Tests/testpractice/Example/example.py",
+		"/home/holt/Misc_Scripts/Python_Tests/testpractice/Tests/test.py",
+		"/home/holt/file.py",
+		"/home/holt/Misc_Scripts/Python_Tests/test/start.py",
+		"/home/holt/Misc_Scripts/Python_Tests/test/packA/a1.py",
+		"/home/holt/Misc_Scripts/Python_Tests/Puckuge/mod1.py",
+		"/home/holt/Misc_Scripts/Python_Tests/Puckuge/mod2.py",
+		"/home/holt/Misc_Scripts/Python_Tests/Puckuge/Subpuck1/modsub11.py",
+		"/home/holt/Misc_Scripts/Python_Tests/example/example.py",
+		"/home/holt/Prog_Sub/sample_mess.xml",
+		"/home/holt/Misc_Scripts/Python_Tests/test/test_example.py",
+		"/home/holt/Misc_Scripts/Python_Tests/test/context.py",
+		"/home/holt/Misc_Scripts/Python_Tests/test_um_unittest.py",
+		"/home/holt/Misc_Scripts/Python_Tests/unnecessary_maths.py",
+		"/home/holt/Taxometabarcode/Python/testtest.py",
+		"/home/holt/Documentation/read_docs/meta_02.rst",
+		"/home/holt/Documentation/read_docs/meta_02.md"
+	],
+	"find":
+	{
+		"height": 39.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"Test_FASTAs",
+			"-",
+			"test_mdata_record_dict_missing_one(self):",
+			"elif",
+			"remaining_identifiers",
+			"remaining",
+			"local_identifiers",
+			"'Test_FASTAs/.+'",
+			", valid_identifiers",
+			"validate_number_of_columns",
+			"validate_insdc_sequence_range",
+			"validate_insdc_sequence_range(",
+			"validate_local_organism_name",
+			"test_validate_mandatory_correct",
+			"validate_mandatory_headers",
+			"test_validate_mandatory_reverse_mismatch",
+			"validate_mandatory_headers",
+			"test_validate_mandatory_correct",
+			"test_validate_accession_bool",
+			"validate_number_of_columns",
+			"validate_local_organism_name",
+			"validate_insdc_sequence_range",
+			"sequence_range",
+			"validate_ncbi_tax_id",
+			"test_validate_tax_id_valid_w_ncbi",
+			"validate_local_organism_name",
+			"test_validate_organism_name_bool",
+			"validate_local_organism_name",
+			"test_validate_accession_valid",
+			"validate_identifier",
+			"test_validate_identier_bad_chars",
+			"test_validate_identifier_valid",
+			"(",
+			"validate_mandatory_headers",
+			"test_validate_mandatory_wrong_type_2",
+			"validate_local_organism_name",
+			"number_of_col",
+			"test_validate_accession_null",
+			"validate_identifier",
+			"test_validate_accession_null",
+			"test_validate_tax_id_valid_wo_ncbi",
+			"^AC \t\\*",
+			"^AC  \\*",
+			"^ID.+",
+			"message = ",
+			"error =",
+			"validate_seq_range_case_4",
+			"validate_seq_range_case_5",
+			"validate_seq_range_case_6",
+			"validate_seq_range_case_7",
+			"validate_seq_range_case_2",
+			"validate_seq_range_case_3",
+			"validate_seq_range_case_4",
+			"validate_seq_range_case_5",
+			"validate_seq_range_case_6",
+			"validate_accession_case_2",
+			"validate_accession_case_3",
+			"validate_accession_case_4",
+			"validate_accession_case_5",
+			"validate_accession_case_6",
+			"validate_accession_range",
+			"null",
+			"self",
+			"really_long_name",
+			"ERROR:",
+			"''",
+			"'!\"£$%^&*()'",
+			"'reallylongnameofatleast50charactersisthisenoughofthemyet'",
+			"[A-Z]{1,4}\\d{5,}",
+			"^(\\-a=?)?([A-Z]{1,4}\\d{5,})$",
+			"i do not ",
+			"table_errors_found",
+			"\\\\d"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"Test_Files",
+			"--",
+			"self",
+			", self.valid_identifiers",
+			"[",
+			"AC * ",
+			"ID   XXX; XXX; linear; XXX; XXX; XXX; XXX.",
+			"validate_seq_range_case_5",
+			"validate_seq_range_case_6",
+			"validate_seq_range_case_7",
+			"validate_seq_range_case_8",
+			"validate_seq_range_case_3",
+			"validate_seq_range_case_4",
+			"validate_seq_range_case_5",
+			"validate_seq_range_case_6",
+			"validate_seq_range_case_7",
+			"validate_accession_case_7",
+			"validate_accession_case_3",
+			"validate_accession_case_4",
+			"validate_accession_case_5",
+			"validate_accession_case_6",
+			"validate_accession_case_7",
+			"validate_sequence_range",
+			"too_long_name",
+			"['']",
+			"unacceptable_characters_name",
+			"really_long_name",
+			"metadata_table_valid",
+			"[0-9]"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "test_files.sublime-project",
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 530.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/Taxometabarcode/TXMB_validator_python/txmb_validator_python.sublime-project"
+			]
+		],
+		"width": 410.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 50.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
