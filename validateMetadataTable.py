@@ -61,8 +61,8 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 	mandatory_headers -- list of mandatory header names
 
 	Returns:
-	custom_headers -- list of any non-mandatory headers identified
 	mandatory_header_errors -- list of any errors found with header names
+	table_custom_headers -- list of any non-mandatory headers identified
 	"""
 
 	mandatory_header_errors = []
@@ -85,7 +85,7 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 
 	input_custom_headers = input_headers
 
-	return mandatory_header_errors, input_custom_headers
+	return mandatory_header_errors, table_custom_headers
 
 
 def validate_custom_columns(table_custom_columns, record_custom_columns):
