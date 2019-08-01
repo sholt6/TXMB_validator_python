@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+
 import unittest
 import sys
 import gzip
 import validateMetadataRecord as vmr
 import validateMetadataTable as vmt
 import validateFasta as vFa
+
 
 def validate_metadata_record(metadata_record_filename):
 	"""Validate metadata record from manifest file
@@ -165,7 +168,6 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	return metadata_table_errors, local_identifiers
 
 
-
 def validate_fasta(fasta_filename, table_identifiers):
 	"""Validate sequence fasta file
 
@@ -177,17 +179,29 @@ def validate_fasta(fasta_filename, table_identifiers):
 	fasta_errors -- list of errors found in fasta_file
 	"""
 
+	fasta_errors = vFa.validate_txmb_fasta(fasta_filename, table_identifiers)
 
-def report_errors(report_file, error_messages):
+	return fasta_errors
+
+
+def report_errors(report_filename, error_messages):
 	"""Report on errors found in dataset
 
 	Keyword arguments:
-	report_file -- file handle for error report
+	report_file -- str, name for error report
 	error_messages -- list of errors found in all files
-
-	Returns:
-	error_filename -- str, name of file with error messages, existence confirmed
 	"""
+
+	report_file = open(report_filename, 'w')
+	message_start = 'ERROR: '
+	message_end = '\n'
+
+	for error in error_messages:
+		report_file.write(message_start + error + message_end)
+
+	report_file.close()
+
+	return True
 
 
 def validate_txmb(manifest_filename):
@@ -210,11 +224,9 @@ def validate_txmb(manifest_filename):
 	metadata_record_errors, metadata_record, record_custom_columns = validate_metadata_record(manifest_filename)
 
 	report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
-	report_file = open('report_filename', 'w')
 
 	if metadata_record_errors:
-		report_errors(report_file, metadata_record_errors)
-		report_file.close()
+		report_errors(report_filename, metadata_record_errors)
 		sys.exit('Could not validate metadata record, please view error ' +
 				 'messages in ' + report_filename)
 
@@ -224,8 +236,7 @@ def validate_txmb(manifest_filename):
 							table_filename, record_custom_columns, ncbi_tax)
 
 	if metadata_table_errors:
-		report_errors(report_file, metadata_table_errors)
-		report_file.close()
+		report_errors(report_filename, metadata_table_errors)
 		sys.exit('Could not validate ' + table_filename + ', please view ' +
 				 'error messages in ' + report_filename)
 
@@ -234,14 +245,25 @@ def validate_txmb(manifest_filename):
 	fasta_errors = validate_fasta(fasta_filename, local_identifiers)
 
 	if fasta_errors:
-		report_errors(report_file, fasta_errors)
-		report_file.close()
+		report_errors(report_filename, fasta_errors)
 		sys.exit('Could not validate ' + fasta_filename + ', please view' +
 				 'error messages in ' + report_filename)
 
-	report_file.close()
+	return metadata_record['REFERENCEDATASETNAME']
 
-	return True
+
+def main():
+
+	manifest_filename = sys.argv[1]
+
+	submission_valid = validate_txmb(manifest_filename)
+
+	if submission_valid:
+		print('Taxonomic reference set \'{0}\' validated successfully'
+			  .format(submission_valid))
+
+if __name__ == '__main__':
+	main()
 
 
 class Test(unittest.TestCase):
