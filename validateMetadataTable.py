@@ -159,10 +159,18 @@ def validate_identifier(sequence_identifier):
 
 	identifier_errors = []
 
-	if (not sequence_identifier or np.isnan(sequence_identifier)):
+	if not sequence_identifier:
 		message = ("Sequence identifier is null")
 		identifier_errors.append(message)
 		return identifier_errors
+
+	try:
+		np.isnan(sequence_identifier)
+		message = ("Sequence identifier is null")
+		identifier_errors.append(message)
+		return identifier_errors
+	except TypeError:
+		pass
 
 	if (len(sequence_identifier) > field_length_limit):
 		message = ("Sequence identifier is too long (>50): {0}".format(sequence_identifier))
