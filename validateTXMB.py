@@ -111,8 +111,18 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	try:
 		sequence_metadata_table = pd.read_csv(table_filename,
 										compression='gzip', header=0, sep='\t')
-	except (FileNotFoundError, UnicodeDecodeError, OSError) as e:
-		return e, local_identifiers
+	except FileNotFoundError:
+		message = 'File \'{0}\' could not be found.'.format(table_filename)
+		metadata_table_errors.append(message)
+		return metadata_table_errors, local_identifiers
+	except UnicodeDecodeError:
+		message = 'File \'{0}\' could not be read.'.format(table_filename)
+		metadata_table_errors.append(message)
+		return metadata_table_errors, local_identifiers
+	except OSError:
+		message = 'File \'{0}\' could not be read.'.format(table_filename)
+		metadata_table_errors.append(message)
+		return metadata_table_errors, local_identifiers
 
 	input_headers = list(sequence_metadata_table.columns.values)
 
@@ -221,6 +231,7 @@ def validate_txmb(manifest_filename):
 	validation_result - bool, True if no errors found
 	"""
 
+	submission_invalid = False
 	metadata_record_errors = []
 	metadata_table_errors = []
 	fasta_errors = []
@@ -236,18 +247,18 @@ def validate_txmb(manifest_filename):
 
 	if metadata_record_errors:
 		report_errors(report_filename, metadata_record_errors)
-		sys.exit('Could not validate metadata record, please view error ' +
-				 'messages in ' + report_filename)
+		return ('Could not validate metadata record, please view error ' +
+				'messages in ' + report_filename)
 
-	table_filename = metadata_record('TABLE')
+	table_filename = metadata_record['TABLE']
 
 	metadata_table_errors, local_identifiers = validate_metadata_table(
 							table_filename, record_custom_columns, ncbi_tax)
 
 	if metadata_table_errors:
 		report_errors(report_filename, metadata_table_errors)
-		sys.exit('Could not validate ' + table_filename + ', please view ' +
-				 'error messages in ' + report_filename)
+		return ('Could not validate ' + table_filename + ', please view ' +
+				'error messages in ' + report_filename)
 
 	fasta_filename = metadata_record('FASTA')
 
@@ -255,19 +266,21 @@ def validate_txmb(manifest_filename):
 
 	if fasta_errors:
 		report_errors(report_filename, fasta_errors)
-		sys.exit('Could not validate ' + fasta_filename + ', please view' +
-				 'error messages in ' + report_filename)
+		return ('Could not validate ' + fasta_filename + ', please view' +
+				'error messages in ' + report_filename)
 
-	return metadata_record['REFERENCEDATASETNAME']
+	return False
 
 
 def main():
 
 	manifest_filename = sys.argv[1]
 
-	submission_valid = validate_txmb(manifest_filename)
+	submission_invalid = validate_txmb(manifest_filename)
 
-	if submission_valid:
+	if submission_invalid:
+		print('Submission validation failed: {0}'.format(submission_invalid))
+	else:
 		print('Taxonomic reference set \'{0}\' validated successfully'
 			  .format(submission_valid))
 
@@ -409,97 +422,97 @@ class Test(unittest.TestCase):
 
 	# validate_txmb tests
 	def test_txmb_val_valid(self):
-		test_txmb_val_valid_result = validate_txmb('valid.txt')
-		self.assertTrue(test_txmb_val_valid_result)
+		test_txmb_val_valid_result = validate_txmb('Test_Files/valid.txt')
+		self.assertFalse(test_txmb_val_valid_result)
 
 	def test_txmb_val_valid_w_customs(self):
-		valid_w_customs_result = validate_txmb('valid_w_customs.txt')
-		self.assertTrue(valid_w_customs_result)
+		valid_w_customs_result = validate_txmb('Test_Files/valid_w_customs.txt')
+		self.assertFalse(valid_w_customs_result)
 
 	def test_txmb_val_two_ids_f_valid_t(self):
-		two_ids_f_valid_t_result = validate_txmb('two_ids_f_valid_t.txt')
-		self.assertFalse(two_ids_f_valid_t_result)
+		two_ids_f_valid_t_result = validate_txmb('Test_Files/two_ids_f_valid_t.txt')
+		self.assertTrue(two_ids_f_valid_t_result)
 
 	def test_txmb_val_two_seqs_f_valid_t(self):
-		two_seqs_f_valid_t_result = validate_txmb('two_seqs_f_valid_t.txt')
-		self.assertFalse(two_seqs_f_valid_t_result)
+		two_seqs_f_valid_t_result = validate_txmb('Test_Files/two_seqs_f_valid_t.txt')
+		self.assertTrue(two_seqs_f_valid_t_result)
 
 	def test_txmb_val_empty_id_f_valid_t(self):
-		empty_id_f_valid_t_result = validate_txmb('empty_id_f_valid_t_result.txt')
-		self.assertFalse(empty_id_f_valid_t_result)
+		empty_id_f_valid_t_result = validate_txmb('Test_Files/empty_id_f_valid_t.txt')
+		self.assertTrue(empty_id_f_valid_t_result)
 
 	def test_txmb_val_empty_line_id_f_valid_t(self):
-		empty_line_id_f_valid_t_result = validate_txmb('empty_line_id_f_valid_t.txt')
-		self.assertFalse(empty_line_id_f_valid_t_result)
+		empty_line_id_f_valid_t_result = validate_txmb('Test_Files/empty_line_id_f_valid_t.txt')
+		self.assertTrue(empty_line_id_f_valid_t_result)
 
 	def test_txmb_val_empty_line_seq_f_valid_t(self):
-		empty_line_seq_f_valid_t_result = validate_txmb('empty_line_seq_f_valid_t.txt')
-		self.assertFalse(empty_line_seq_f_valid_t_result)
+		empty_line_seq_f_valid_t_result = validate_txmb('Test_Files/empty_line_seq_f_valid_t.txt')
+		self.assertTrue(empty_line_seq_f_valid_t_result)
 
 	def test_txmb_val_missing_entry_f_valid_t(self):
-		missing_entry_f_valid_t_result = validate_txmb('missing_entry_f_valid_t.txt')
-		self.assertFalse(missing_entry_f_valid_t_result)
+		missing_entry_f_valid_t_result = validate_txmb('Test_Files/missing_entry_f_valid_t.txt')
+		self.assertTrue(missing_entry_f_valid_t_result)
 
 	def test_txmb_val_valid_f_empty_id_col_t(self):
-		valid_f_empty_id_col_t_result = validate_txmb('valid_f_empty_id_col_t.txt')
-		self.assertFalse(valid_f_empty_id_col_t_result)
+		valid_f_empty_id_col_t_result = validate_txmb('Test_Files/valid_f_empty_id_col_t.txt')
+		self.assertTrue(valid_f_empty_id_col_t_result)
 
 	def test_txmb_val_valid_f_empty_row_t(self):
-		valid_f_empty_row_t_result = validate_txmb('valid_f_empty_row_t.txt')
-		self.assertFalse(valid_f_empty_row_t_result)
+		valid_f_empty_row_t_result = validate_txmb('Test_Files/valid_f_empty_row_t.txt')
+		self.assertTrue(valid_f_empty_row_t_result)
 
 	def test_txmb_val_valid_f_missing_id_col_t(self):
-		valid_f_missing_id_col_t_result = validate_txmb('valid_f_missing_id_col_t.txt')
-		self.assertFalse(valid_f_missing_id_col_t_result)
+		valid_f_missing_id_col_t_result = validate_txmb('Test_Files/valid_f_missing_id_col_t.txt')
+		self.assertTrue(valid_f_missing_id_col_t_result)
 
 	def test_txmb_val_valid_f_missing_identifier_t(self):
-		valid_f_missing_identifier_t_result = validate_txmb('valid_f_missing_identifier_t.txt')
-		self.assertFalse(valid_f_missing_identifier_t_result)
+		valid_f_missing_identifier_t_result = validate_txmb('Test_Files/valid_f_missing_identifier_t.txt')
+		self.assertTrue(valid_f_missing_identifier_t_result)
 
 	def test_txmb_val_valid_f_missing_insdc_acc_and_range_t(self):
-		valid_f_missing_insdc_acc_and_range_t_result = validate_txmb('valid_f_missing_insdc_acc_and_range_t.txt')
-		self.assertTrue(valid_f_missing_insdc_acc_and_range_t_result)
+		valid_f_missing_insdc_acc_and_range_t_result = validate_txmb('Test_Files/valid_f_missing_insdc_acc_and_range_t.txt')
+		self.assertFalse(valid_f_missing_insdc_acc_and_range_t_result)
 
 	def test_txmb_val_valid_f_missing_insdc_acc_t(self):
-		valid_f_missing_insdc_acc_t_result = validate_txmb('valid_f_missing_insdc_acc_t.txt')
-		self.assertFalse(valid_f_missing_insdc_acc_t_result)
+		valid_f_missing_insdc_acc_t_result = validate_txmb('Test_Files/valid_f_missing_insdc_acc_t.txt')
+		self.assertTrue(valid_f_missing_insdc_acc_t_result)
 
 	def test_txmb_val_valid_f_missing_insdc_range_t(self):
-		valid_f_missing_insdc_range_t_result = validate_txmb('valid_f_missing_insdc_range_t.txt')
-		self.assertTrue(valid_f_missing_insdc_range_t_result)
+		valid_f_missing_insdc_range_t_result = validate_txmb('Test_Files/valid_f_missing_insdc_range_t.txt')
+		self.assertFalse(valid_f_missing_insdc_range_t_result)
 
 	def test_txmb_val_valid_f_missing_lineage_t(self):
-		valid_f_missing_lineage_t_result = validate_txmb('valid_f_missing_lineage_t.txt')
+		valid_f_missing_lineage_t_result = validate_txmb('Test_Files/valid_f_missing_lineage_t.txt')
 		self.assertTrue(valid_f_missing_lineage_t_result)
 
 	def test_txmb_val_valid_f_missing_row_t(self):
-		valid_f_missing_row_t_result = validate_txmb('valid_f_missing_row_t.txt')
-		self.assertFalse(valid_f_missing_row_t_result)
+		valid_f_missing_row_t_result = validate_txmb('Test_Files/valid_f_missing_row_t.txt')
+		self.assertTrue(valid_f_missing_row_t_result)
 
 	def test_txmb_val_valid_f_missing_tax_id_t(self):
-		valid_f_missing_tax_id_t_result = validate_txmb('valid_f_missing_tax_id_t.txt')
-		self.assertFalse(valid_f_missing_tax_id_t_result)
+		valid_f_missing_tax_id_t_result = validate_txmb('Test_Files/valid_f_missing_tax_id_t.txt')
+		self.assertTrue(valid_f_missing_tax_id_t_result)
 
 	def test_txmb_val_valid_f_missing_taxon_name_t(self):
-		valid_f_missing_taxon_name_t_result = validate_txmb('valid_f_missing_taxon_name_t.txt')
-		self.assertFalse(valid_f_missing_taxon_name_t_result)
+		valid_f_missing_taxon_name_t_result = validate_txmb('Test_Files/valid_f_missing_taxon_name_t.txt')
+		self.assertTrue(valid_f_missing_taxon_name_t_result)
 
 	def test_txmb_val_non_ncbi_w_tax_ids(self):
-		non_ncbi_w_tax_ids_result = validate_txmb('non_ncbi_w_tax_ids.txt')
-		self.assertFalse(non_ncbi_w_tax_ids_result)
+		non_ncbi_w_tax_ids_result = validate_txmb('Test_Files/non_ncbi_w_tax_ids.txt')
+		self.assertTrue(non_ncbi_w_tax_ids_result)
 
 	def test_txmb_val_non_ncbi_no_tax_ids(self):
-		non_ncbi_no_tax_ids_result = validate_txmb('non_ncbi_no_tax_ids.txt')
-		assert(non_ncbi_no_tax_ids_result)
+		non_ncbi_no_tax_ids_result = validate_txmb('Test_Files/non_ncbi_no_tax_ids.txt')
+		self.assertFalse(non_ncbi_no_tax_ids_result)
 
 	def test_txmb_val_invalid_dataset_name(self):
-		invalid_dataset_name_result = validate_txmb('invalid_dataset_name.txt')
-		assert(invalid_dataset_name_result)
+		invalid_dataset_name_result = validate_txmb('Test_Files/invalid_dataset_name.txt')
+		self.assertTrue(invalid_dataset_name_result)
 
 	def test_txmb_val_different_tax_system_w_taxids(self):
-		different_tax_system_w_taxids_result = validate_txmb('different_tax_system_w_taxids.txt')
-		assert(different_tax_system_w_taxids_result)
+		different_tax_system_w_taxids_result = validate_txmb('Test_Files/different_tax_system_w_taxids.txt')
+		self.assertTrue(different_tax_system_w_taxids_result)
 
 	def test_txmb_val_different_tax_system_no_taxids(self):
-		different_tax_system_no_taxids_result = validate_txmb('different_tax_system_no_taxids.txt')
-		assert(different_tax_system_no_taxids_result)
+		different_tax_system_no_taxids_result = validate_txmb('Test_Files/different_tax_system_no_taxids.txt')
+		self.assertFalse(different_tax_system_no_taxids_result)
