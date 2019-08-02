@@ -9,6 +9,7 @@ import unittest
 import requests
 import json
 import re
+import numpy as np
 
 character_regex = re.compile("^[A-Za-z0-9_]+$")
 field_length_limit = 50
@@ -158,9 +159,10 @@ def validate_identifier(sequence_identifier):
 
 	identifier_errors = []
 
-	if (not sequence_identifier):
+	if (not sequence_identifier or np.isnan(sequence_identifier)):
 		message = ("Sequence identifier is null")
 		identifier_errors.append(message)
+		return identifier_errors
 
 	if (len(sequence_identifier) > field_length_limit):
 		message = ("Sequence identifier is too long (>50): {0}".format(sequence_identifier))
@@ -290,6 +292,8 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 			message = ("Name '{0}' does not appear to be valid. Names should match {1}"
 					   .format(local_organism_name, name_regex))
 			organism_name_errors.append(message)
+
+	expected_ncbi_tax_ids = [ int(tax_id) for tax_id in expected_ncbi_tax_ids]
 
 	return organism_name_errors, expected_ncbi_tax_ids
 

@@ -6,6 +6,7 @@ import gzip
 import validateMetadataRecord as vmr
 import validateMetadataTable as vmt
 import validateFasta as vFa
+import pandas as pd
 
 
 def validate_metadata_record(metadata_record_filename):
@@ -32,21 +33,27 @@ def validate_metadata_record(metadata_record_filename):
 
 	try:
 		with open(metadata_record_filename) as metadata_record_file:
-			record_content = metadata_record_file.read()
+			record_content = metadata_record_file.readlines()
 	except FileNotFoundError:
 		message = ('Could not find ' + metadata_record_filename)
 		metadata_record_errors.append(message)
-		return metadata_record_errors
+		return (metadata_record_errors, metadata_record,
+				record_custom_columns, ncbi_tax)
 
 	for line in record_content:
 		line_content = line.split(None, 1)
 		try:
 			assert(len(line_content) == 2)
 		except AssertionError:
-			message = ('The following metadata record line could not be '
-					   'processed:\n' + line)
-			metadata_record_errors.append(message)
-			return metadata_record_errors
+			if line_content[0] not in mandatory_record_content:
+				continue
+			else:
+				message = ('The following metadata record line could not be '
+						   'processed. This may be malformed, or a mandatory'
+						   ' value was not supplied:\n' + line)
+				metadata_record_errors.append(message)
+				return (metadata_record_errors, metadata_record,
+						record_custom_columns, ncbi_tax)
 
 		if line_content[0] in mandatory_record_content:
 			metadata_record[line_content[0]] = line_content[1]
@@ -75,7 +82,7 @@ def validate_metadata_record(metadata_record_filename):
 			vmr.validate_custom_columns(record_custom_columns))
 
 	return (metadata_record_errors, metadata_record,
-			record_custom_columns, custom_columns)
+			record_custom_columns, ncbi_tax)
 
 
 def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
@@ -127,12 +134,12 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	for row_index in range(0, total_records):
 		row_errors = []
 
-		sequence_identifier = sequence_metadata_table.loc[row_index, mandatory_header[0]]
-		insdc_sequence_accession = sequence_metadata_table.loc[row_index, mandatory_header[1]]
-		insdc_sequence_range = sequence_metadata_table.loc[row_index, mandatory_header[2]]
-		local_organism_name = sequence_metadata_table.loc[row_index, mandatory_header[3]]
-		local_lineage = sequence_metadata_table.loc[row_index, mandatory_header[4]]
-		input_ncbi_tax_id = sequence_metadata_table.loc[row_index, mandatory_header[5]]
+		sequence_identifier = sequence_metadata_table.loc[row_index, mandatory_headers[0]]
+		insdc_sequence_accession = sequence_metadata_table.loc[row_index, mandatory_headers[1]]
+		insdc_sequence_range = sequence_metadata_table.loc[row_index, mandatory_headers[2]]
+		local_organism_name = sequence_metadata_table.loc[row_index, mandatory_headers[3]]
+		local_lineage = sequence_metadata_table.loc[row_index, mandatory_headers[4]]
+		input_ncbi_tax_id = sequence_metadata_table.loc[row_index, mandatory_headers[5]]
 
 		row_errors.extend(vmt.validate_identifier(sequence_identifier))
 		local_identifiers.append(sequence_identifier)
@@ -148,9 +155,9 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 												local_organism_name, ncbi_tax)
 		row_errors.extend(organism_errors)
 
-		row_errors.extend(vmt.validate_local_lineage)
+		row_errors.extend(vmt.validate_local_lineage(local_lineage))
 
-		row_errors.extend(validate_ncbi_tax_id(input_ncbi_tax_id,
+		row_errors.extend(vmt.validate_ncbi_tax_id(input_ncbi_tax_id,
 							expected_tax_ids, ncbi_tax, local_organism_name))
 
 		for i in range(0, len(row_errors)):
@@ -220,8 +227,10 @@ def validate_txmb(manifest_filename):
 
 	record_custom_columns = {}
 	local_identifiers = []
+	ncbi_tax = False
 
-	metadata_record_errors, metadata_record, record_custom_columns = validate_metadata_record(manifest_filename)
+	metadata_record_errors, metadata_record, record_custom_columns, ncbi_tax = \
+									 validate_metadata_record(manifest_filename)
 
 	report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
 
@@ -291,14 +300,14 @@ class Test(unittest.TestCase):
 	def test_mdata_record_val_valid(self):
 		mdata_record_val_result_valid = validate_metadata_record('Test_Files/valid.txt')
 		self.assertFalse(mdata_record_val_result_valid[0])
-		self.assertTrue(mdata_record_val_result_valid[1] == valid_record)
+		self.assertTrue(mdata_record_val_result_valid[1] == self.valid_record)
 		self.assertFalse(mdata_record_val_result_valid[2])
 
 	def test_mdata_record_val_valid_w_customs(self):
 		mdata_record_val_result_valid_w_customs = validate_metadata_record('Test_Files/valid_w_customs.txt')
 		self.assertFalse(mdata_record_val_result_valid_w_customs[0])
-		self.assertTrue(mdata_record_val_result_valid_w_customs[1] == valid_record_w_customs)
-		self.assertTrue(mdata_record_val_result_valid_w_customs[2] == custom_columns)
+		self.assertTrue(mdata_record_val_result_valid_w_customs[1] == self.valid_record_w_customs)
+		self.assertTrue(mdata_record_val_result_valid_w_customs[2] == self.custom_columns)
 
 	# generate_custom_col_dict tests
 
@@ -307,67 +316,67 @@ class Test(unittest.TestCase):
 	def test_mdata_tab_val_valid(self):
 		mdata_tab_val_result_valid = validate_metadata_table('Test_Files/valid.tsv.gz', {}, True)
 		self.assertFalse(mdata_tab_val_result_valid[0])
-		self.assertTrue(mdata_tab_val_result_valid[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_valid[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_valid_w_customs(self):
 		mdata_tab_val_result_valid = validate_metadata_table('Test_Files/valid_w_customs.tsv.gz', self.custom_columns, True)
 		self.assertFalse(mdata_tab_val_result_valid_w_customs[0])
-		self.assertTrue(mdata_tab_val_result_valid_w_customs[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_valid_w_customs[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_taxon_name(self):
 		mdata_tab_val_result_missing_taxon_name = validate_metadata_table('Test_Files/missing_taxon_name.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_taxon_name[0])
-		self.assertTrue(mdata_tab_val_result_missing_taxon_name[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_missing_taxon_name[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_tax_id(self):
 		mdata_tab_val_result_missing_tax_id = validate_metadata_table('Test_Files/missing_tax_id.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_tax_id[0])
-		self.assertTrue(mdata_tab_val_result_missing_tax_id[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_missing_tax_id[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_row(self):
 		mdata_tab_val_result_missing_row = validate_metadata_table('Test_Files/missing_row.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_row[0])
-		self.assertFalse(mdata_tab_val_result_missing_row[1] == table_identifiers)
+		self.assertFalse(mdata_tab_val_result_missing_row[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_lineage(self):
 		mdata_tab_val_result_missing_lineage = validate_metadata_table('Test_Files/missing_lineage.tsv.gz', {}, True)
 		self.assertFalse(mdata_tab_val_result_[0])
-		self.assertTrue(mdata_tab_val_result_[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_insdc_range(self):
 		mdata_tab_val_result_missing_insdc_range = validate_metadata_table('Test_Files/missing_insdc_range.tsv.gz', {}, True)
 		self.assertFalse(mdata_tab_val_result_missing_insdc_range[0])
-		self.assertTrue(mdata_tab_val_result_missing_insdc_range[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_missing_insdc_range[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_insdc_acc(self):
 		mdata_tab_val_result_missing_insdc_acc = validate_metadata_table('Test_Files/missing_insdc_acc.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_insdc_acc[0])
-		self.assertTrue(mdata_tab_val_result_missing_insdc_acc[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_missing_insdc_acc[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_insdc_acc_and_range(self):
 		mdata_tab_val_result_missing_insdc_acc_and_range = validate_metadata_table('Test_Files/missing_insdc_acc_and_range.tsv.gz', {}, True)
 		self.assertFalse(mdata_tab_val_result_missing_insdc_acc_and_range[0])
-		self.assertTrue(mdata_tab_val_result_missing_insdc_acc_and_range[1] == table_identifiers)
+		self.assertTrue(mdata_tab_val_result_missing_insdc_acc_and_range[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_identifier(self):
 		mdata_tab_val_result_missing_identifier = validate_metadata_table('Test_Files/missing_identifier.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_identifier[0])
-		self.assertFalse(mdata_tab_val_result_missing_identifier[1] == table_identifiers)
+		self.assertFalse(mdata_tab_val_result_missing_identifier[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_id_column(self):
 		mdata_tab_val_result_missing_id_column = validate_metadata_table('Test_Files/missing_id_column.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_missing_id_column[0])
-		self.assertFalse(mdata_tab_val_result_missing_id_column[1] == table_identifiers)
+		self.assertFalse(mdata_tab_val_result_missing_id_column[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_empty_row(self):
 		mdata_tab_val_result_empty_row = validate_metadata_table('Test_Files/empty_row.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_empty_row[0])
-		self.assertFalse(mdata_tab_val_result_empty_row[1] == table_identifiers)
+		self.assertFalse(mdata_tab_val_result_empty_row[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_empty_id_column(self):
 		mdata_tab_val_result_empty_id_column = validate_metadata_table('Test_Files/empty_id_column.tsv.gz', {}, True)
 		self.assertTrue(mdata_tab_val_result_empty_id_column[0])
-		self.assertFalse(mdata_tab_val_result_empty_id_column[1] == table_identifiers)
+		self.assertFalse(mdata_tab_val_result_empty_id_column[1] == self.table_identifiers)
 
 	# validate_fasta tests
 	def test_fasta_val_valid(self):
