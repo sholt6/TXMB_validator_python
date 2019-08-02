@@ -66,7 +66,7 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 	"""
 
 	mandatory_header_errors = []
-	custom_headers = []
+	input_custom_headers = []
 	found_headers = []
 
 	for mandatory_header in mandatory_headers:
@@ -85,7 +85,7 @@ def validate_mandatory_headers(input_headers, mandatory_headers):
 
 	input_custom_headers = input_headers
 
-	return mandatory_header_errors, table_custom_headers
+	return mandatory_header_errors, input_custom_headers
 
 
 def validate_custom_columns(table_custom_columns, record_custom_columns):
@@ -103,6 +103,19 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 	custom_column_errors = []
 
 	record_headers = list(record_custom_columns.keys())
+
+	if not (table_custom_columns and record_custom_columns):
+		return custom_column_errors
+	elif table_custom_columns:
+		message = ("Custom columns are used in the metadata table without "
+				   "being defined in the metadata record")
+		custom_column_errors.append(message)
+		return custom_column_errors
+	elif record_custom_columns:
+		message = ("Custom columns are defined in the metadata record without "
+				   "being used in the metadata table")
+		custom_column_errors.append(message)
+		return custom_column_errors
 
 	sorted_record_headers = record_headers.sort()
 	sorted_table_headers = record_headers.sort()
