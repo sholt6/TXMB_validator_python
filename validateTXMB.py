@@ -98,19 +98,19 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	local_identifiers -- list of sequence identifiers found in metadata table
 	"""
 
-	mandatory_headers = ('local_identifier',
+	mandatory_headers = ['local_identifier',
 						 'insdc_sequence_accession',
 						 'insdc_sequence_range',
 						 'local_organism_name',
 						 'local_lineage',
-						 'ncbi_tax_id')
+						 'ncbi_tax_id']
 
 	metadata_table_errors = []
 	local_identifiers = []
 
 	try:
 		sequence_metadata_table = pd.read_csv(table_filename,
-										compression='gzip', header=0, sep='\t')
+				compression='gzip', header=0, sep='\t', keep_default_na=False)
 	except FileNotFoundError:
 		message = 'File \'{0}\' could not be found.'.format(table_filename)
 		metadata_table_errors.append(message)
@@ -144,12 +144,17 @@ def validate_metadata_table(table_filename, record_custom_columns, ncbi_tax):
 	for row_index in range(0, total_records):
 		row_errors = []
 
-		sequence_identifier = sequence_metadata_table.loc[row_index, mandatory_headers[0]]
-		insdc_sequence_accession = sequence_metadata_table.loc[row_index, mandatory_headers[1]]
-		insdc_sequence_range = sequence_metadata_table.loc[row_index, mandatory_headers[2]]
-		local_organism_name = sequence_metadata_table.loc[row_index, mandatory_headers[3]]
-		local_lineage = sequence_metadata_table.loc[row_index, mandatory_headers[4]]
-		input_ncbi_tax_id = sequence_metadata_table.loc[row_index, mandatory_headers[5]]
+		try:
+			sequence_identifier = sequence_metadata_table.loc[row_index, mandatory_headers[0]]
+			insdc_sequence_accession = sequence_metadata_table.loc[row_index, mandatory_headers[1]]
+			insdc_sequence_range = sequence_metadata_table.loc[row_index, mandatory_headers[2]]
+			local_organism_name = sequence_metadata_table.loc[row_index, mandatory_headers[3]]
+			local_lineage = sequence_metadata_table.loc[row_index, mandatory_headers[4]]
+			input_ncbi_tax_id = sequence_metadata_table.loc[row_index, mandatory_headers[5]]
+		except KeyError as e:
+			message = ('Mandatory column \'{0}\' could not be found in metadata table')
+			metadata_table_errors.append(message)
+			return metadata_table_errors, local_identifiers
 
 		row_errors.extend(vmt.validate_identifier(sequence_identifier))
 		local_identifiers.append(sequence_identifier)
@@ -288,7 +293,8 @@ if __name__ == '__main__':
 	main()
 
 
-class Test(unittest.TestCase):
+# base test case assigns variables to be used in tests
+class Test_vars(unittest.TestCase):
 	valid_record = {'REFERENCEDATASETNAME' : 'valid_submission',
 					'LOCALTAXONOMY' : 'NCBI',
 					'LOCALTAXONOMYVERSION' : '',
@@ -309,7 +315,8 @@ class Test(unittest.TestCase):
 				   	 	 'ITS1DB00588024', 'ITS1DB00588025', 'ITS1DB00588022',
 				   		 'ITS1DB00588023']
 
-	# validate_metadata_record tests
+# validate_metadata_record tests
+class vmr_tests(Test_vars):
 	def test_mdata_record_val_valid(self):
 		mdata_record_val_result_valid = validate_metadata_record('Test_Files/valid.txt')
 		self.assertFalse(mdata_record_val_result_valid[0])
@@ -317,22 +324,24 @@ class Test(unittest.TestCase):
 		self.assertFalse(mdata_record_val_result_valid[2])
 
 	def test_mdata_record_val_valid_w_customs(self):
+		print(self.valid_record)
 		mdata_record_val_result_valid_w_customs = validate_metadata_record('Test_Files/valid_w_customs.txt')
 		self.assertFalse(mdata_record_val_result_valid_w_customs[0])
 		self.assertTrue(mdata_record_val_result_valid_w_customs[1] == self.valid_record_w_customs)
 		self.assertTrue(mdata_record_val_result_valid_w_customs[2] == self.custom_columns)
 
-	# generate_custom_col_dict tests
+# generate_custom_col_dict tests
 
 
-	# validate_metadata_table
+# validate_metadata_table
+class vmt_tests(Test_vars):
 	def test_mdata_tab_val_valid(self):
 		mdata_tab_val_result_valid = validate_metadata_table('Test_Files/valid.tsv.gz', {}, True)
 		self.assertFalse(mdata_tab_val_result_valid[0])
 		self.assertTrue(mdata_tab_val_result_valid[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_valid_w_customs(self):
-		mdata_tab_val_result_valid = validate_metadata_table('Test_Files/valid_w_customs.tsv.gz', self.custom_columns, True)
+		mdata_tab_val_result_valid_w_customs = validate_metadata_table('Test_Files/valid_w_customs.tsv.gz', self.custom_columns, True)
 		self.assertFalse(mdata_tab_val_result_valid_w_customs[0])
 		self.assertTrue(mdata_tab_val_result_valid_w_customs[1] == self.table_identifiers)
 
@@ -353,8 +362,8 @@ class Test(unittest.TestCase):
 
 	def test_mdata_tab_val_missing_lineage(self):
 		mdata_tab_val_result_missing_lineage = validate_metadata_table('Test_Files/missing_lineage.tsv.gz', {}, True)
-		self.assertFalse(mdata_tab_val_result_[0])
-		self.assertTrue(mdata_tab_val_result_[1] == self.table_identifiers)
+		self.assertFalse(mdata_tab_val_result_missing_lineage[0])
+		self.assertTrue(mdata_tab_val_result_missing_lineage[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_insdc_range(self):
 		mdata_tab_val_result_missing_insdc_range = validate_metadata_table('Test_Files/missing_insdc_range.tsv.gz', {}, True)
@@ -391,7 +400,8 @@ class Test(unittest.TestCase):
 		self.assertTrue(mdata_tab_val_result_empty_id_column[0])
 		self.assertFalse(mdata_tab_val_result_empty_id_column[1] == self.table_identifiers)
 
-	# validate_fasta tests
+# validate_fasta tests
+class vfa_tests(Test_vars):
 	def test_fasta_val_valid(self):
 		fasta_val_result_valid = validate_fasta('Test_Files/valid.fasta.gz', self.table_identifiers)
 		self.assertFalse(fasta_val_result_valid)
@@ -420,7 +430,8 @@ class Test(unittest.TestCase):
 		fasta_val_result_empty_id = validate_fasta('Test_Files/empty_id.fasta.gz', self.table_identifiers)
 		self.assertTrue(fasta_val_result_empty_id)
 
-	# validate_txmb tests
+# validate_txmb tests
+class vtxmb_tests(Test_vars):
 	def test_txmb_val_valid(self):
 		test_txmb_val_valid_result = validate_txmb('Test_Files/valid.txt')
 		self.assertFalse(test_txmb_val_valid_result)

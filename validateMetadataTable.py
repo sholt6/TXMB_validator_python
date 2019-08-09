@@ -265,7 +265,7 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 
 	organism_name_errors = []
 	expected_ncbi_tax_ids = []
-	tax_suggest_url = "https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/suggest-for-submission/"
+	tax_suggest_url = "https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/scientific-name/"
 	name_regex = re.compile(r'^[A-Z][a-z]+\s.+$')
 
 	if (not local_organism_name):
