@@ -121,27 +121,26 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 	record_headers.sort()
 	table_custom_columns.sort()
 
-	if (len(sorted_record_headers) != len(sorted_table_headers)):
+	if (len(record_headers) != len(table_custom_columns)):
 		message = ("Number of custom headers is mismatched between metadata "
 				   "record and metadata table.")
 		custom_column_errors.append(message)
 
-	for record_index in range(0, len(sorted_record_headers)):
+	for record_index in range(0, len(record_headers)):
 		try:
-			header_to_check = sorted_record_headers[record_index]
-			table_index = sorted_table_headers.index(header_to_check)
+			header_to_check = record_headers[record_index]
+			table_index = table_custom_columns.index(header_to_check)
 		except ValueError:
 			message = ("A custom header specified in the metadata record, does"
 					   " not exist in the metadata table: {0}".format(header_to_check))
 			custom_column_errors.append(message)
 			continue
 
-		sorted_record_headers = sorted_record_headers.pop(record_index)
-		sorted_table_headers = sorted_table_headers.pop(table_index)
+		table_custom_columns.pop(table_index)
 
-	if sorted_table_headers:
+	if table_custom_columns:
 		message = ("One or more headers used in the metadata table were "
-				   "not defined in the metadata record: {0}".format(sorted_table_headers))
+				   "not defined in the metadata record: {0}".format(table_custom_columns))
 		custom_column_errors.append(message)
 
 	return custom_column_errors
