@@ -30,6 +30,7 @@ def validate_metadata_record(metadata_record_filename):
 
 	mandatory_record_content = ['LOCALTAXONOMY', 'REFERENCEDATASETNAME',
 								'FASTA', 'TABLE']
+	optional_record_content = ['LOCALTAXONOMYVERSION']
 
 	try:
 		with open(metadata_record_filename) as metadata_record_file:
@@ -57,6 +58,8 @@ def validate_metadata_record(metadata_record_filename):
 						record_custom_columns, ncbi_tax)
 
 		if line_content[0] in mandatory_record_content:
+			metadata_record[line_content[0]] = line_content[1]
+		elif line_content[0] in optional_record_content:
 			metadata_record[line_content[0]] = line_content[1]
 		else:
 			raw_custom_columns[line_content[0]] = line_content[1]
@@ -266,7 +269,7 @@ def validate_txmb(manifest_filename):
 		return ('Could not validate ' + table_filename + ', please view ' +
 				'error messages in ' + report_filename)
 
-	fasta_filename = metadata_record('FASTA')
+	fasta_filename = metadata_record['FASTA']
 
 	fasta_errors = validate_fasta(fasta_filename, local_identifiers)
 
@@ -337,7 +340,6 @@ class vmr_tests(Test_vars):
 
 	def test_mdata_record_valid_tx_ver(self):
 		mdata_record_valid_tx_ver = validate_metadata_record('Test_Files/valid_tx_ver.txt')
-		print(mdata_record_valid_tx_ver[1])
 		self.assertFalse(mdata_record_valid_tx_ver[0])
 		self.assertTrue(mdata_record_valid_tx_ver[1] == self.valid_tx_ver)
 		self.assertFalse(mdata_record_valid_tx_ver[2])
@@ -533,9 +535,9 @@ class vtxmb_tests(Test_vars):
 		self.assertTrue(invalid_dataset_name_result)
 
 	def test_txmb_val_different_tax_system_w_taxids(self):
-		different_tax_system_w_taxids_result = validate_txmb('Test_Files/different_tax_system_w_taxids.txt')
+		different_tax_system_w_taxids_result = validate_txmb('Test_Files/non_ncbi_w_taxids.txt')
 		self.assertTrue(different_tax_system_w_taxids_result)
 
 	def test_txmb_val_different_tax_system_no_taxids(self):
-		different_tax_system_no_taxids_result = validate_txmb('Test_Files/different_tax_system_no_taxids.txt')
+		different_tax_system_no_taxids_result = validate_txmb('Test_Files/non_ncbi_no_tax_ids.txt')
 		self.assertFalse(different_tax_system_no_taxids_result)
