@@ -105,21 +105,21 @@ def validate_custom_columns(table_custom_columns, record_custom_columns):
 
 	record_headers = list(record_custom_columns.keys())
 
-	if not (table_custom_columns and record_custom_columns):
+	if (not table_custom_columns) and (not record_custom_columns):
 		return custom_column_errors
-	elif table_custom_columns:
+	elif (table_custom_columns) and (not record_custom_columns):
 		message = ("Custom columns are used in the metadata table without "
 				   "being defined in the metadata record")
 		custom_column_errors.append(message)
 		return custom_column_errors
-	elif record_custom_columns:
+	elif (not table_custom_columns) and (record_custom_columns):
 		message = ("Custom columns are defined in the metadata record without "
 				   "being used in the metadata table")
 		custom_column_errors.append(message)
 		return custom_column_errors
 
-	sorted_record_headers = record_headers.sort()
-	sorted_table_headers = record_headers.sort()
+	record_headers.sort()
+	table_custom_columns.sort()
 
 	if (len(sorted_record_headers) != len(sorted_table_headers)):
 		message = ("Number of custom headers is mismatched between metadata "
