@@ -357,7 +357,7 @@ class vmt_tests(Test_vars):
 
 	def test_mdata_tab_val_missing_row(self):
 		mdata_tab_val_result_missing_row = validate_metadata_table('Test_Files/missing_row.tsv.gz', {}, True)
-		self.assertTrue(mdata_tab_val_result_missing_row[0])
+		self.assertFalse(mdata_tab_val_result_missing_row[0])
 		self.assertFalse(mdata_tab_val_result_missing_row[1] == self.table_identifiers)
 
 	def test_mdata_tab_val_missing_lineage(self):
