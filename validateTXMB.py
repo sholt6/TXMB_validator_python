@@ -41,6 +41,7 @@ def validate_metadata_record(metadata_record_filename):
 				record_custom_columns, ncbi_tax)
 
 	for line in record_content:
+		line = line.rstrip()
 		line_content = line.split(None, 1)
 		try:
 			assert(len(line_content) == 2)
@@ -297,15 +298,20 @@ if __name__ == '__main__':
 class Test_vars(unittest.TestCase):
 	valid_record = {'REFERENCEDATASETNAME' : 'valid_submission',
 					'LOCALTAXONOMY' : 'NCBI',
-					'LOCALTAXONOMYVERSION' : '',
 					'FASTA' : 'valid.fasta.gz',
 					'TABLE' : 'valid.tsv.gz'}
 
-	valid_record_w_customs = {'REFERENCEDATASETNAME' : 'valid_submission',
+	valid_record_w_customs = {'REFERENCEDATASETNAME' : 'valid_w_customs',
 						      'LOCALTAXONOMY' : 'NCBI',
-							  'LOCALTAXONOMYVERSION' : '',
 							  'FASTA' : 'valid.fasta.gz',
 							  'TABLE' : 'valid_w_customs.tsv.gz'}
+
+	valid_tx_ver = {'REFERENCEDATASETNAME' : 'valid_tx_ver',
+					'LOCALTAXONOMY' : 'tax_sys',
+					'LOCALTAXONOMYVERSION' : '1',
+					'FASTA' : 'valid.fasta.gz',
+					'TABLE' : 'valid.tsv.gz'}
+
 
 	custom_columns = {'Annotation' : 'Source of annotation',
 					  'ITSoneDB URL' : 'URL within ITSoneDB'}
@@ -324,11 +330,17 @@ class vmr_tests(Test_vars):
 		self.assertFalse(mdata_record_val_result_valid[2])
 
 	def test_mdata_record_val_valid_w_customs(self):
-		print(self.valid_record)
 		mdata_record_val_result_valid_w_customs = validate_metadata_record('Test_Files/valid_w_customs.txt')
 		self.assertFalse(mdata_record_val_result_valid_w_customs[0])
 		self.assertTrue(mdata_record_val_result_valid_w_customs[1] == self.valid_record_w_customs)
 		self.assertTrue(mdata_record_val_result_valid_w_customs[2] == self.custom_columns)
+
+	def test_mdata_record_valid_tx_ver(self):
+		mdata_record_valid_tx_ver = validate_metadata_record('Test_Files/valid_tx_ver.txt')
+		print(mdata_record_valid_tx_ver[1])
+		self.assertFalse(mdata_record_valid_tx_ver[0])
+		self.assertTrue(mdata_record_valid_tx_ver[1] == self.valid_tx_ver)
+		self.assertFalse(mdata_record_valid_tx_ver[2])
 
 # generate_custom_col_dict tests
 
