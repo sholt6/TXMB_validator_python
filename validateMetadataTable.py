@@ -265,7 +265,7 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 	organism_name_errors = []
 	expected_ncbi_tax_ids = []
 	tax_suggest_url = "https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/scientific-name/"
-	name_regex = re.compile(r'^[A-Z][a-z]+\s.+$')
+	name_regex = re.compile(r'^[A-Za-z]+\s.+$')
 
 	if (not local_organism_name):
 		message = ("No organism name has been given for this record")
@@ -297,7 +297,7 @@ def validate_local_organism_name(local_organism_name, ncbi_tax):
 			pass
 		else:
 			message = ("Name '{0}' does not appear to be valid. Names should match {1}"
-					   .format(local_organism_name, name_regex))
+					   .format(local_organism_name, name_regex.pattern))
 			organism_name_errors.append(message)
 
 	expected_ncbi_tax_ids = [ int(tax_id) for tax_id in expected_ncbi_tax_ids]
