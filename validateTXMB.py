@@ -252,7 +252,7 @@ def validate_txmb(manifest_filename):
 	metadata_record_errors, metadata_record, record_custom_columns, ncbi_tax = \
 									 validate_metadata_record(manifest_filename)
 
-    try:
+	try:
 		report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
 	except KeyError:
 		report_filename = ("unamed_record.report")
@@ -304,19 +304,19 @@ if __name__ == '__main__':
 class Test_vars(unittest.TestCase):
 	valid_record = {'REFERENCEDATASETNAME' : 'valid_submission',
 					'LOCALTAXONOMY' : 'NCBI',
-					'FASTA' : 'valid.fasta.gz',
-					'TABLE' : 'valid.tsv.gz'}
+					'FASTA' : 'Test_Files/valid.fasta.gz',
+					'TABLE' : 'Test_Files/valid.tsv.gz'}
 
 	valid_record_w_customs = {'REFERENCEDATASETNAME' : 'valid_w_customs',
 						      'LOCALTAXONOMY' : 'NCBI',
-							  'FASTA' : 'valid.fasta.gz',
-							  'TABLE' : 'valid_w_customs.tsv.gz'}
+							  'FASTA' : 'Test_Files/valid.fasta.gz',
+							  'TABLE' : 'Test_Files/valid_w_customs.tsv.gz'}
 
 	valid_tx_ver = {'REFERENCEDATASETNAME' : 'valid_tx_ver',
 					'LOCALTAXONOMY' : 'tax_sys',
 					'LOCALTAXONOMYVERSION' : '1',
-					'FASTA' : 'valid.fasta.gz',
-					'TABLE' : 'valid.tsv.gz'}
+					'FASTA' : 'Test_Files/valid.fasta.gz',
+					'TABLE' : 'Test_Files/valid.tsv.gz'}
 
 
 	custom_columns = {'Annotation' : 'Source of annotation',
