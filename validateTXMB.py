@@ -252,7 +252,10 @@ def validate_txmb(manifest_filename):
 	metadata_record_errors, metadata_record, record_custom_columns, ncbi_tax = \
 									 validate_metadata_record(manifest_filename)
 
-	report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
+    try:
+		report_filename = (metadata_record['REFERENCEDATASETNAME'] + ".report")
+	except KeyError:
+		report_filename = ("unamed_record.report")
 
 	if metadata_record_errors:
 		report_errors(report_filename, metadata_record_errors)
@@ -535,7 +538,7 @@ class vtxmb_tests(Test_vars):
 		self.assertTrue(invalid_dataset_name_result)
 
 	def test_txmb_val_different_tax_system_w_taxids(self):
-		different_tax_system_w_taxids_result = validate_txmb('Test_Files/non_ncbi_w_taxids.txt')
+		different_tax_system_w_taxids_result = validate_txmb('Test_Files/non_ncbi_w_tax_ids.txt')
 		self.assertTrue(different_tax_system_w_taxids_result)
 
 	def test_txmb_val_different_tax_system_no_taxids(self):
