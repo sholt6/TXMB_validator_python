@@ -511,7 +511,7 @@ class vtxmb_tests(Test_vars):
 
 	def test_txmb_val_valid_f_missing_lineage_t(self):
 		valid_f_missing_lineage_t_result = validate_txmb('Test_Files/valid_f_missing_lineage_t.txt')
-		self.assertTrue(valid_f_missing_lineage_t_result)
+		self.assertFalse(valid_f_missing_lineage_t_result)
 
 	def test_txmb_val_valid_f_missing_row_t(self):
 		valid_f_missing_row_t_result = validate_txmb('Test_Files/valid_f_missing_row_t.txt')
