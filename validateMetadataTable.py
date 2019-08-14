@@ -544,7 +544,7 @@ class Test(unittest.TestCase):
 	def test_validate_organism_name_human_ncbi(self):
 		validate_organism_name_case_1 = validate_local_organism_name('Homo sapiens', True)
 		assert(not validate_organism_name_case_1[0])
-		assert('9606' in validate_organism_name_case_1[1])
+		assert(9606 in validate_organism_name_case_1[1])
 
 	def test_validate_organism_name_human_not_ncbi(self):
 		validate_organism_name_case_2 = validate_local_organism_name('Homo sapiens', False)
@@ -554,7 +554,7 @@ class Test(unittest.TestCase):
 	def test_validate_organism_name_stram_ncbi(self):
 		validate_organism_name_case_3 = validate_local_organism_name('Stramenopiles sp. MAST-7 TOSAG23-7', True)
 		assert(not validate_organism_name_case_3[0])
-		assert('2590674' in validate_organism_name_case_3[1])
+		assert(2590674 in validate_organism_name_case_3[1])
 
 	def test_validate_organism_name_stram_not_ncbi(self):
 		validate_organism_name_case_4 = validate_local_organism_name('Stramenopiles sp. MAST-7 TOSAG23-7', False)
