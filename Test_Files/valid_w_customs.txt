@@ -1,8 +1,8 @@
 REFERENCEDATASETNAME valid_w_customs
 LOCALTAXONOMY NCBI
 LOCALTAXONOMYVERSION
-FASTA valid.fasta.gz
-TABLE valid_w_customs.tsv.gz
+FASTA Test_Files/valid.fasta.gz
+TABLE Test_Files/valid_w_customs.tsv.gz
 CUSTOMCOLUMNHEADER1 Annotation
 CUSTOMCOLUMNHEADER1DESCRIPTION Source of annotation
 CUSTOMCOLUMNHEADER2 ITSoneDB URL
